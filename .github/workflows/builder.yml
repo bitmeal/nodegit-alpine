@@ -24,4 +24,5 @@ jobs:
     strategy:
       matrix: ${{fromJSON(needs.generator.outputs.matrix)}}
     steps:
-    - run: echo [dryrun] docker buildx build $(echo "${{needs.generator.outputs.buildx}}" | jq -r ".\"${{matrix.image}}\".\"${{matrix.nodegit}}\"") .
+    - run: sudo apt install -qq -y jq
+    - run: echo [dryrun] docker buildx build $(echo '${{needs.generator.outputs.buildx}}' | jq -r ".\"${{matrix.image}}\".\"${{matrix.nodegit}}\"") .
