@@ -5,7 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.generate-matrix.outputs.matrix }}
-      buildx: ${{ steps.generate-buildx.outputs.tags }}
+      buildx: ${{ steps.generate-buildx.outputs.buildx }}
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-node@v2
