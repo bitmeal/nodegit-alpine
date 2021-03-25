@@ -1,0 +1,27 @@
+name: builder
+on: push
+jobs:
+  generator:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.generate-matrix.outputs.matrix }}
+      buildx: ${{ steps.generate-buildx.outputs.tags }}
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+      with:
+        check-latest: true
+    - run: sudo apt install -qq -y jq && npm install
+    - run: node generator > manifest.json
+    - id: generate-matrix
+      run: echo "::set-output name=matrix::$(jq -c '.matrix' manifest.json)"
+    - id: generate-buildx
+      run: echo "::set-output name=buildx::$(jq -c '.buildx' manifest.json)"
+  
+  image-builder:
+    needs: generator
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{fromJSON(needs.generator.outputs.matrix)}}
+    steps:
+    - run: echo [dryrun] docker buildx build $(echo ${{needs.generator.outputs.buildx}} | jq ".\"${{matrix.image}}\".\"${{matrix.nodegit}}\"") .
