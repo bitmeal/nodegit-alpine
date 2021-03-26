@@ -15,7 +15,7 @@ jobs:
     - name: Fetch Dependencies
       run: sudo apt install -qq -y jq && npm install
     - name: Generate Container Build Info
-      run: node generator > manifest.json
+      run: node generator bitmeal/nodegit --node-versions 3 --nodegit-versions 3 > manifest.json
     - name: Export Build Matrix
       id: generate-matrix
       run: echo "::set-output name=matrix::$(jq -c '.matrix' manifest.json)"
@@ -42,8 +42,8 @@ jobs:
         password: ${{ secrets.DOCKER_HUB_SECRET }}
     - uses: actions/checkout@v2
     - run: sudo apt install -qq -y jq
-    - name: Build and tag Container
-      run: docker buildx build  --output "type=image,push=false" --build-arg ALPINE_TAG=${{matrix.image}} --build-arg NODEGIT_VERSION=${{matrix.nodegit}} --platform "linux/amd64,linux/arm64" $(echo '${{needs.generator.outputs.buildx}}' | jq -r '."${{matrix.image}}"."${{matrix.nodegit}}"') .
+    - name: Build and tag Container as local Images
+      run: docker buildx build  --load --build-arg ALPINE_TAG=${{matrix.image}} --build-arg NODEGIT_VERSION=${{matrix.nodegit}} --platform "linux/amd64,linux/arm64" $(echo '${{needs.generator.outputs.buildx}}' | jq -r '."${{matrix.image}}"."${{matrix.nodegit}}"') .
     - name: Check Nodegit Version
       run: |
         TAG="$(echo '${{needs.generator.outputs.test-tags}}' | jq -r '."${{matrix.image}}"."${{matrix.nodegit}}"')" && 

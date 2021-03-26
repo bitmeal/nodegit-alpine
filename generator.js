@@ -2,6 +2,8 @@
 
 const latest = require('./get-version');
 const semver = require('semver');
+const argv = require('yargs');
+
 
 const util = require('util');
 
@@ -159,32 +161,48 @@ function make_version_info(node_versions, nodegit_versions) {
 }
 
 
-// cli (== null)
+// cli
 if (require.main === module) {
     // build node + nodegit version selection and docker tags
-    const node_versions_count = 3;
-    const nodegit_versions_count = 4;
-
-    const image_name = 'bitmeal/nodegit';
-
-    get_versions(node_versions_count, nodegit_versions_count)
-    .then((versions) => {
-        let builds = make_build_info(versions.node, versions.nodegit);
-        let buildx_tags = make_buildx_tags(builds, image_name);
-        let test_tags = make_test_tags(builds, image_name);
-        let matrix = make_matrix(versions.node, versions.nodegit);
-        let version_info = make_version_info(versions.node, versions.nodegit);
-
-        console.log(
-            JSON.stringify(
-                {
-                    matrix: matrix,
-                    buildx: buildx_tags,
-                    'test-tags': test_tags,
-                    'version-info': version_info
-                },
-                null, 2
-            )
-        );
-    });
+    argv
+    .usage('Usage:\n  $0 <imagename> [options]')
+    .command('$0 <imagename> [options]', 'generate container build data',
+        (yargs) => {
+            return yargs
+            .alias('n', 'node-versions')
+            .describe('n', 'number of node versions to build containers for')
+            .alias('g', 'nodegit-versions')
+            .describe('g', 'number of nodegit versions to build containers for')
+            .positional('imagename', {})
+            .demandOption(['n', 'g'])
+        },
+        (argv) => {
+            const node_versions_count = argv.n;
+            const nodegit_versions_count = argv.g;
+        
+            const image_name = argv.imagename;
+        
+            get_versions(node_versions_count, nodegit_versions_count)
+            .then((versions) => {
+                let builds = make_build_info(versions.node, versions.nodegit);
+                let buildx_tags = make_buildx_tags(builds, image_name);
+                let test_tags = make_test_tags(builds, image_name);
+                let matrix = make_matrix(versions.node, versions.nodegit);
+                let version_info = make_version_info(versions.node, versions.nodegit);
+        
+                console.log(
+                    JSON.stringify(
+                        {
+                            matrix: matrix,
+                            buildx: buildx_tags,
+                            'test-tags': test_tags,
+                            'version-info': version_info
+                        },
+                        null, 2
+                    )
+                );
+            });
+        }
+    )
+    .argv;
 }
