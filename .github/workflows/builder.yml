@@ -29,11 +29,17 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix: ${{fromJSON(needs.generator.outputs.matrix)}}
+      fail-fast: false
     steps:
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v1
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
+    - name: Login to Docker Hub
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKER_HUB_TOKEN }}
+        password: ${{ secrets.DOCKER_HUB_SECRET }}
     - uses: actions/checkout@v2
     - run: sudo apt install -qq -y jq
     - name: Build and tag Container
