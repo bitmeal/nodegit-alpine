@@ -7,6 +7,7 @@ ARG NODEGIT_VERSION
 
 RUN \
     apk add build-base python libgit2-dev krb5-dev libssh-dev && \
+    npm config set user 0 && npm config set unsafe-perm true && \
     npm install -g --production nodegit@${NODEGIT_VERSION} && \
     rm -rf /usr/local/lib/node_modules/nodegit/vendor
 
