@@ -54,7 +54,7 @@ jobs:
     - name: Test Nodegit
       run: |
         TAG="$(echo '${{needs.generator.outputs.test-tags}}' | jq -r '."${{matrix.image}}"."${{matrix.nodegit}}"')" && 
-        docker run --rm -v "$(pwd)/test":/test $TAG /bin/ash -c "cd /test && ./init.sh && echo using: && cat package.json && npm install && ./test.js"
+        docker run --rm -v "$(pwd)/test":/test $TAG /bin/ash -c "cp -r /test ~/test && cd ~/test && ./init.sh && echo using: && cat package.json && npm install && ./test.js"
     - name: Build and push multiarch Images
       run: docker buildx build  --push --build-arg ALPINE_TAG=${{matrix.image}} --build-arg NODEGIT_VERSION=${{matrix.nodegit}} --platform "linux/amd64,linux/arm64" $(echo '${{needs.generator.outputs.buildx}}' | jq -r '."${{matrix.image}}"."${{matrix.nodegit}}"') .
       
