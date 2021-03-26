@@ -1,9 +1,9 @@
 {
-  "name": "alpine-nodegit",
+  "name": "alpine-nodegit-helpers",
   "version": "0.1.0",
-  "description": "",
-  "author": "",
-  "license": "MPL-v2.0",
+  "description": "helper scripts to build CI matrix of docker images and nodegit versions",
+  "author": "Arne Wendt (@bitmeal)",
+  "license": "MPL-2.0",
   "dependencies": {
     "axios": "^0.21.1",
     "npm": "^7.7.4",

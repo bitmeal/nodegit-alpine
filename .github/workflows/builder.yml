@@ -6,6 +6,7 @@ jobs:
     outputs:
       matrix: ${{ steps.generate-matrix.outputs.matrix }}
       buildx: ${{ steps.generate-buildx.outputs.buildx }}
+      test-tags: ${{ steps.generate-test-tags.outputs.test-tags }}
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-node@v2
@@ -17,6 +18,8 @@ jobs:
       run: echo "::set-output name=matrix::$(jq -c '.matrix' manifest.json)"
     - id: generate-buildx
       run: echo "::set-output name=buildx::$(jq -c '.buildx' manifest.json)"
+    - id: generate-test-tags
+      run: echo "::set-output name=test-tags::$(jq -c '."test-tags"' manifest.json)"
   
   image-builder:
     needs: generator
@@ -24,5 +27,21 @@ jobs:
     strategy:
       matrix: ${{fromJSON(needs.generator.outputs.matrix)}}
     steps:
+    - uses: docker/setup-buildx-action@v1
+      id: install-buildx
+      with:
+        install: true
     - run: sudo apt install -qq -y jq
-    - run: echo [dryrun] docker buildx build $(echo '${{needs.generator.outputs.buildx}}' | jq -r ".\"${{matrix.image}}\".\"${{matrix.nodegit}}\"") .
+    - name: build and tag container
+      run: docker build --build-arg ALPINE_TAG=${{matrix.image}} --build-arg NODEGIT_VERSION=${{matrix.nodegit}} --platform linux/amd64,linux/arm64 $(echo '${{needs.generator.outputs.buildx}}' | jq -r ".\"${{matrix.image}}\".\"${{matrix.nodegit}}\"") .
+    - name: check nodegit version
+      run: |
+        TAG="$(echo '${{needs.generator.outputs.test-tags}}' | jq -r '.\"${{matrix.image}}\".\"${{matrix.nodegit}}\"')" && 
+        echo $TAG && 
+        [ "$(docker run --rm $TAG /usr/local/bin/npm -g ls | grep nodegit | grep -oP '(\d+\.){2}\d+')" == "${{matrix.nodegit}}" ] && 
+        echo NODEGIT VERSIONS MATCHING @${{matrix.nodegit}}
+    - name: test nodegit
+      run: |
+        TAG="$(echo '${{needs.generator.outputs.test-tags}}' | jq -r '.\"${{matrix.image}}\".\"${{matrix.nodegit}}\"')" && 
+        docker run --rm -v "$(pwd)/test":/test $TAG /bin/ash -c "cd /test && ./init.sh && cat package.json && npm install && ./test.js"
+      

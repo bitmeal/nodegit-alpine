@@ -1,6 +1,27 @@
 # `nodegit:alpine`
 A `node:alpine` based container with precompiled nodegit
 
+
+```bash
+docker pull bitmeal/nodegit:alpine
+```
+> view @ [Docker HUB](https://hub.docker.com/r/bitmeal/nodegit) 🚢
+
+## important infos
+How does it work?
+* nodegit is installed globally in `/usr/local/lib/node_modules`
+* the `npm` binary is masked from `/opt/linker/bin/npm` and `npm` calls are intercepted and evaluated
+* the global nodegit version is *linked* (`npm link nodegit`), if a dependency on nodegit - from a `package.json` or as an module to install - is detected
+
+> ⚡ remember that `npm` is masked and calls are intercepted when debugging
+> 
+> ⚡ to *install* (read: fetch as dependency) nodegit manually, call `npm link nodegit`
+> 
+> ⚡ to call `npm` directly, use `/usr/local/bin/npm`
+>
+> ⚡⚠ **don't try to use this container to add nodegit dependency to a project that did not depend on it beforehand! running `npm install nodegit` will not add it to your `package.json`!**
+
+
 ## why?
 *Because nodegit is nice for automation!*
 
@@ -32,3 +53,7 @@ Tags follow the official node image convention, introducing an additional leadin
 * `<name>-alpine`, `<major-version>-alpine`: latest nodegit version, based on respective node image (e.g. `14-alpine`/`fermium-alpine`)
 * `<nodegit-version>-<name>-alpine`, `<nodegit-version>-<major-version>-alpine`: specified nodegit version, based on respective node image
 * ⚡ **No `latest` tag!** `latest` refers to a debian based image for `node:latest`
+
+## platforms
+* `linux/amd64`
+* `linux/arm64`

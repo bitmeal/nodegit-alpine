@@ -122,7 +122,18 @@ function make_buildx_tags(builds, image_name) {
             return acc;
         }, {})
         return acc;
-    }, {});    
+    }, {});
+}
+
+// generate tags for testing from matrix values
+function make_test_tags(builds, image_name) {
+    return builds.reduce((acc, image) => {
+        acc[image.image] = image.variants.reduce((acc, version) => {
+            acc[version.nodegit] = `${image_name}:${version.tags[0]}`
+            return acc;
+        }, {})
+        return acc;
+    }, {});
 }
 
 
@@ -160,6 +171,7 @@ if (require.main === module) {
     .then((versions) => {
         let builds = make_build_info(versions.node, versions.nodegit);
         let buildx_tags = make_buildx_tags(builds, image_name);
+        let test_tags = make_test_tags(builds, image_name);
         let matrix = make_matrix(versions.node, versions.nodegit);
         let version_info = make_version_info(versions.node, versions.nodegit);
 
@@ -168,6 +180,7 @@ if (require.main === module) {
                 {
                     matrix: matrix,
                     buildx: buildx_tags,
+                    'test-tags': test_tags,
                     'version-info': version_info
                 },
                 null, 2
