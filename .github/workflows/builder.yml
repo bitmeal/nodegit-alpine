@@ -12,10 +12,12 @@ jobs:
     - uses: actions/setup-node@v2
       with:
         check-latest: true
-    - run: sudo apt install -qq -y jq && npm install
+    - name: Fetch Dependencies
+      run: sudo apt install -qq -y jq && npm install
     - name: Generate Container Build Info
       run: node generator > manifest.json
-    - id: generate-matrix
+    - name: Export Build Matrix
+      id: generate-matrix
       run: echo "::set-output name=matrix::$(jq -c '.matrix' manifest.json)"
     - id: generate-buildx
       run: echo "::set-output name=buildx::$(jq -c '.buildx' manifest.json)"
@@ -35,7 +37,7 @@ jobs:
     - uses: actions/checkout@v2
     - run: sudo apt install -qq -y jq
     - name: Build and tag Container
-      run: docker buildx build  --output "type=image,push=false" --build-arg ALPINE_TAG=${{matrix.image}} --build-arg NODEGIT_VERSION=${{matrix.nodegit}} --platform linux/amd64,linux/386,linux/arm64 $(echo '${{needs.generator.outputs.buildx}}' | jq -r '."${{matrix.image}}"."${{matrix.nodegit}}"') .
+      run: docker buildx build  --output "type=image,push=false" --build-arg ALPINE_TAG=${{matrix.image}} --build-arg NODEGIT_VERSION=${{matrix.nodegit}} --platform "linux/amd64,linux/arm64" $(echo '${{needs.generator.outputs.buildx}}' | jq -r '."${{matrix.image}}"."${{matrix.nodegit}}"') .
     - name: Check Nodegit Version
       run: |
         TAG="$(echo '${{needs.generator.outputs.test-tags}}' | jq -r '."${{matrix.image}}"."${{matrix.nodegit}}"')" && 
