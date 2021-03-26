@@ -13,7 +13,8 @@ jobs:
       with:
         check-latest: true
     - run: sudo apt install -qq -y jq && npm install
-    - run: node generator > manifest.json
+    - name: Generate Container Build Info
+      run: node generator > manifest.json
     - id: generate-matrix
       run: echo "::set-output name=matrix::$(jq -c '.matrix' manifest.json)"
     - id: generate-buildx
@@ -27,21 +28,22 @@ jobs:
     strategy:
       matrix: ${{fromJSON(needs.generator.outputs.matrix)}}
     steps:
-    - uses: docker/setup-buildx-action@v1
-      id: install-buildx
-      with:
-        install: true
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v1
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+    - uses: actions/checkout@v2
     - run: sudo apt install -qq -y jq
-    - name: build and tag container
-      run: docker build --build-arg ALPINE_TAG=${{matrix.image}} --build-arg NODEGIT_VERSION=${{matrix.nodegit}} --platform linux/amd64,linux/arm64 $(echo '${{needs.generator.outputs.buildx}}' | jq -r ".\"${{matrix.image}}\".\"${{matrix.nodegit}}\"") .
-    - name: check nodegit version
+    - name: Build and tag Container
+      run: docker buildx build  --output "type=image,push=false" --build-arg ALPINE_TAG=${{matrix.image}} --build-arg NODEGIT_VERSION=${{matrix.nodegit}} --platform linux/amd64,linux/386,linux/arm64 $(echo '${{needs.generator.outputs.buildx}}' | jq -r '."${{matrix.image}}"."${{matrix.nodegit}}"') .
+    - name: Check Nodegit Version
       run: |
-        TAG="$(echo '${{needs.generator.outputs.test-tags}}' | jq -r '.\"${{matrix.image}}\".\"${{matrix.nodegit}}\"')" && 
+        TAG="$(echo '${{needs.generator.outputs.test-tags}}' | jq -r '."${{matrix.image}}"."${{matrix.nodegit}}"')" && 
         echo $TAG && 
         [ "$(docker run --rm $TAG /usr/local/bin/npm -g ls | grep nodegit | grep -oP '(\d+\.){2}\d+')" == "${{matrix.nodegit}}" ] && 
         echo NODEGIT VERSIONS MATCHING @${{matrix.nodegit}}
-    - name: test nodegit
+    - name: Test Nodegit
       run: |
-        TAG="$(echo '${{needs.generator.outputs.test-tags}}' | jq -r '.\"${{matrix.image}}\".\"${{matrix.nodegit}}\"')" && 
-        docker run --rm -v "$(pwd)/test":/test $TAG /bin/ash -c "cd /test && ./init.sh && cat package.json && npm install && ./test.js"
+        TAG="$(echo '${{needs.generator.outputs.test-tags}}' | jq -r '."${{matrix.image}}"."${{matrix.nodegit}}"')" && 
+        docker run --rm -v "$(pwd)/test":/test $TAG /bin/ash -c "cd /test && ./init.sh && echo using: && cat package.json && npm install && ./test.js"
       
