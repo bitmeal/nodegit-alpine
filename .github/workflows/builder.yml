@@ -41,7 +41,8 @@ jobs:
         username: ${{ secrets.DOCKER_HUB_TOKEN }}
         password: ${{ secrets.DOCKER_HUB_SECRET }}
     - uses: actions/checkout@v2
-    - run: sudo apt install -qq -y jq
+    - name: Fetch Dependencies
+      run: sudo apt install -qq -y jq
     - name: Build local testing Image
       run: |
         TAG="$(echo '${{needs.generator.outputs.test-tags}}' | jq -r '."${{matrix.image}}"."${{matrix.nodegit}}"')" && 

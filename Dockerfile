@@ -23,7 +23,10 @@ ARG NODEGIT_VERSION
 COPY --from=builder /usr/local/lib/node_modules/nodegit /usr/local/lib/node_modules/nodegit/
 COPY --from=builder /opt/linker /opt/linker/
 
-RUN apk add libgit2 krb5-libs libssh ca-certificates
+RUN \
+    apk add libgit2 krb5-libs libssh ca-certificates && \
+    npm config set unsafe-perm true
+
 
 # ADD .profile /root/
 # ENV ENV=/root/.profile
