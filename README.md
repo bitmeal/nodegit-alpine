@@ -12,6 +12,8 @@ How does it work?
 * nodegit is installed globally in `/usr/local/lib/node_modules`
 * the `npm` binary is masked from `/opt/linker/bin/npm` and `npm` calls are intercepted and evaluated
 * the global nodegit version is *linked* (`npm link nodegit`), if a dependency on nodegit - from a `package.json` or as an module to install - is detected
+* `NODEGIT_LINK_SILENT=true` disables output of `npm` interception and link process
+* `NODEGIT_LINK_OFF=true` disables 'nodegit linker' and forwards calls to `npm`
 
 > ⚡ remember that `npm` is masked and calls are intercepted when debugging
 > 
