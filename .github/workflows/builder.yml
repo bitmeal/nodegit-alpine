@@ -69,17 +69,19 @@ jobs:
     - name: Prepare status artifact @SUCCESS
       if: ${{ success() }}
       run: |
-        echo '{"success": true, "image": "${{matrix.image}}", "nodegit": "${{matrix.nodegit}}"}' | jq '.' > ${{matrix.image}}@${{matrix.nodegit}}.json
+        mkdir status &&
+        echo '{"success": true, "image": "${{matrix.image}}", "nodegit": "${{matrix.nodegit}}"}' | jq '.' > status/${{matrix.image}}@${{matrix.nodegit}}.json
     - name: Prepare status artifact @FAILURE
       if: ${{ failure() }}
       run: |
-        echo '{"success": false, "image": "${{matrix.image}}", "nodegit": "${{matrix.nodegit}}"}' | jq '.' > ${{matrix.image}}@${{matrix.nodegit}}.json
+        mkdir status &&
+        echo '{"success": false, "image": "${{matrix.image}}", "nodegit": "${{matrix.nodegit}}"}' | jq '.' > status/${{matrix.image}}@${{matrix.nodegit}}.json
     - name: Upload status artifact [${{matrix.image}}@${{matrix.nodegit}}.json]
       if: ${{ !cancelled() }}
       uses: actions/upload-artifact@v2
       with:
-        name: ${{matrix.image}}@${{matrix.nodegit}}.json
-        path: ${{matrix.image}}@${{matrix.nodegit}}.json
+        name: status
+        path: status/
 
   chronicler:
     needs:
