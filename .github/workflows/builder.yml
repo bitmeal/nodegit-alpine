@@ -6,6 +6,7 @@ jobs:
     outputs:
       matrix: ${{ steps.generate-matrix.outputs.matrix }}
       buildx: ${{ steps.generate-buildx.outputs.buildx }}
+      tags: ${{ steps.generate-tags.outputs.tags }}
       test-images: ${{ steps.generate-test-images.outputs.test-images }}
     steps:
     - uses: actions/checkout@v2
@@ -21,6 +22,8 @@ jobs:
       run: echo "::set-output name=matrix::$(jq -c '.matrix' manifest.json)"
     - id: generate-buildx
       run: echo "::set-output name=buildx::$(jq -c '.buildx' manifest.json)"
+    - id: generate-tags
+      run: echo "::set-output name=tags::$(jq -c '.tags' manifest.json)"
     - id: generate-test-images
       run: echo "::set-output name=test-images::$(jq -c '."test-images"' manifest.json)"
   
@@ -63,11 +66,11 @@ jobs:
     - name: Prepare status artifact @SUCCESS
       if: ${{ success() }}
       run: |
-        echo '{"success": true, "image": "${{matrix.image}}", "nodegit": "${{matrix.nodegit}}"}' | jq . > ${{matrix.image}}@${{matrix.nodegit}}.json
+        echo '{"success": true, "image": "${{matrix.image}}", "nodegit": "${{matrix.nodegit}}"}' | jq '.' > ${{matrix.image}}@${{matrix.nodegit}}.json
     - name: Prepare status artifact @FAILURE
       if: ${{ failure() }}
       run: |
-        echo '{"success": false, "image": "${{matrix.image}}", "nodegit": "${{matrix.nodegit}}"}' | jq . > ${{matrix.image}}@${{matrix.nodegit}}.json
+        echo '{"success": false, "image": "${{matrix.image}}", "nodegit": "${{matrix.nodegit}}"}' | jq '.' > ${{matrix.image}}@${{matrix.nodegit}}.json
     - name: Upload status artifact [${{matrix.image}}@${{matrix.nodegit}}.json]
       if: ${{ !canceled() }}
       uses: actions/upload-artifact@v2
@@ -76,11 +79,17 @@ jobs:
         path: ${{matrix.image}}@${{matrix.nodegit}}.json
 
   chronicler:
-    needs: image-builder
+    needs:
+      - generator
+      - image-builder
     if: ${{ !canceled() }}
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - name: Fetch Dependencies
+      run: sudo apt install -qq -y jq
+    - name: Show tags passed from generator
+      run: echo ${{needs.generator.outputs.tags}} | jq '.'
     - name: Fetch matrix jobs status artifacts
       uses: actions/download-artifact@v2
       with:
