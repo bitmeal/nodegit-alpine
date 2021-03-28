@@ -50,7 +50,7 @@ jobs:
     - name: Check Nodegit Version
       run: |
         TAG="$(echo '${{needs.generator.outputs.test-tags}}' | jq -r '."${{matrix.image}}"."${{matrix.nodegit}}"')" && 
-        NODEGIT="$(docker run --rm $TAG /usr/local/bin/npm -g ls | grep nodegit | grep -oP '(\d+\.){2}\d+')" && echo "$NODEGIT"
+        NODEGIT="$(docker run --rm $TAG /usr/local/bin/npm -g ls | grep '^\+.*\snodegit@' | grep -oP '(\d+\.){2}\d+')" && echo "nodegit versions: ${NODEGIT}"
         [ "$NODEGIT" == "${{matrix.nodegit}}" ] && 
         echo "nodegit versions @${{matrix.nodegit}} [ OK ]"
     - name: Test Nodegit
