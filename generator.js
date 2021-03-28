@@ -5,9 +5,6 @@ const semver = require('semver');
 const argv = require('yargs');
 
 
-const util = require('util');
-
-
 // get 'annotated' list of node/image and nodegit versions
 function get_versions(node_versions_count, nodegit_versions_count) {
     return new Promise((resolve) => {

@@ -10,7 +10,8 @@ jobs:
       test-images: ${{ steps.generate-test-images.outputs.test-images }}
     steps:
     - uses: actions/checkout@v2
-    - uses: actions/setup-node@v2
+    - name: Setup Node.js
+      uses: actions/setup-node@v2
       with:
         check-latest: true
     - name: Fetch Dependencies
@@ -66,16 +67,13 @@ jobs:
       if: github.ref == 'refs/heads/master'
       run: docker buildx build  --push --build-arg ALPINE_TAG=${{matrix.image}} --build-arg NODEGIT_VERSION=${{matrix.nodegit}} --platform "linux/amd64,linux/arm64" $(echo '${{needs.generator.outputs.buildx}}' | jq -r '."${{matrix.image}}"."${{matrix.nodegit}}"') .
 
-    - name: Prepare status artifact @SUCCESS
-      if: ${{ success() }}
+    - name: Build status artifact [${{matrix.image}}@${{matrix.nodegit}}.json]
+      if: ${{ always() }}
+      env:
+        SUCCESS: ${{ success() }}
       run: |
         mkdir status &&
-        echo '{"success": true, "image": "${{matrix.image}}", "nodegit": "${{matrix.nodegit}}"}' | jq '.' > status/${{matrix.image}}@${{matrix.nodegit}}.json
-    - name: Prepare status artifact @FAILURE
-      if: ${{ failure() }}
-      run: |
-        mkdir status &&
-        echo '{"success": false, "image": "${{matrix.image}}", "nodegit": "${{matrix.nodegit}}"}' | jq '.' > status/${{matrix.image}}@${{matrix.nodegit}}.json
+        echo '{}' | jq --argjson status $SUCCESS --arg run "${GITHUB_RUN_ID}" --arg image "${{matrix.image}}" --arg nodegit "${{matrix.nodegit}}" '. + {success: $status, run: $run, image: $image, nodegit: $nodegit}' > status/${{matrix.image}}@${{matrix.nodegit}}.json
     - name: Upload status artifact [${{matrix.image}}@${{matrix.nodegit}}.json]
       if: ${{ !cancelled() }}
       uses: actions/upload-artifact@v2
@@ -83,7 +81,7 @@ jobs:
         name: status
         path: status/
 
-  chronicler:
+  report:
     needs:
       - generator
       - image-builder
@@ -91,14 +89,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - name: Setup Node.js
+      uses: actions/setup-node@v2
+      with:
+        check-latest: true
     - name: Fetch Dependencies
       run: sudo apt install -qq -y jq
-    - name: Show tags passed from generator
-      run: echo '${{needs.generator.outputs.tags}}' | jq '.'
     - name: Fetch matrix jobs status artifacts
       uses: actions/download-artifact@v2
       with:
         path: jobs
-    - name: Display status artifacts layout
-      run: ls -R
-      working-directory: jobs
+    - name: Initialize report [jobs/tags.json]
+      run: echo '${{needs.generator.outputs.tags}}' | jq '.' > jobs/tags.json
+    - name: Generate Status info
+    - name: Generate Docker Hub Readme [HUB.md]
+      run: node report >> HUB.md
+    - name: Debug show Readme [HUB.md]
+      run: cat HUB.md

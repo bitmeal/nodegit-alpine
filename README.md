@@ -11,17 +11,19 @@ docker pull bitmeal/nodegit:alpine
 How does it work?
 * nodegit is installed globally in `/usr/local/lib/node_modules`
 * the `npm` binary is masked from `/opt/linker/bin/npm` and `npm` calls are intercepted and evaluated
-* the global nodegit version is *linked* (`npm link nodegit`), if a dependency on nodegit - from a `package.json` or as an module to install - is detected
+* the global nodegit version is *linked* (`npm link nodegit`), if a dependency on nodegit is detected (from `package.json` or directly)
+
+Options
 * `NODEGIT_LINK_SILENT=true` disables output of `npm` interception and link process
 * `NODEGIT_LINK_OFF=true` disables 'nodegit linker' and forwards calls to `npm`
 
-> ⚡ remember that `npm` is masked and calls are intercepted when debugging
+> ⚡ when debugging, remember that `npm` is masked and calls are intercepted
 > 
 > ⚡ to *install* (read: fetch as dependency) nodegit manually, call `npm link nodegit`
 > 
 > ⚡ to call `npm` directly, use `/usr/local/bin/npm`
 >
-> ⚡⚠ **don't try to use this container to add nodegit dependency to a project that did not depend on it beforehand! running `npm install nodegit` will not add it to your `package.json`!**
+> ⚠ **don't try to use this container to add a nodegit dependency to a project that did not depend on it beforehand! running `npm install nodegit` will not add it to your `package.json`!**
 
 
 ## why?
@@ -37,7 +39,7 @@ You then found your container to fail while installing nodegit? Yes, it wants to
 We just lost all benefits of **small containers** and increased our jobs' runtime by 5-10 minutes each. We want back these benefits: **fast**, **small** in **size** and **memory footprint**, **pulled in seconds**. ***And that is why!***
 
 ## versions
-Builds images for the latest 3 node.js versions and latest 4 nodegit versions. `lts-alpine` and `alpine` are referenced directly to avoid mismatches between official node images and these nodegit images.
+Builds images for the latest *N* node.js versions and latest *M* nodegit versions (visit docker hub to find *N* and *M*). `lts-alpine` and `alpine` are referenced directly as base image, to avoid mismatches between official node images and these nodegit images.
 
 Tags follow the official node image convention, introducing an additional leading versioning component. Images may be referenced as shown below.
 
@@ -54,7 +56,7 @@ Tags follow the official node image convention, introducing an additional leadin
 * `<nodegit-version>-lts-alpine`: specified nodegit version, based on `lts-alpine`
 * `<name>-alpine`, `<major-version>-alpine`: latest nodegit version, based on respective node image (e.g. `14-alpine`/`fermium-alpine`)
 * `<nodegit-version>-<name>-alpine`, `<nodegit-version>-<major-version>-alpine`: specified nodegit version, based on respective node image
-* ⚡ **No `latest` tag!** `latest` refers to a debian based image for `node:latest`
+* ⚡ **No explicit `latest` tag!** `node:latest` refers to a debian based image and breaks the naming convention
 
 ## platforms
 * `linux/amd64`
