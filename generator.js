@@ -116,7 +116,7 @@ function make_build_info(node_versions, nodegit_versions) {
 }
 
 
-// generate docker buildx --tag options
+// generate docker buildx --tag options for access by matrix values
 function make_buildx_tags(builds, image_name) {
     return builds.reduce((acc, image) => {
         acc[image.image] = image.variants.reduce((acc, version) => {
@@ -127,8 +127,19 @@ function make_buildx_tags(builds, image_name) {
     }, {});
 }
 
-// generate tags for testing from matrix values
-function make_test_tags(builds, image_name) {
+// generate docker tags for access by matrix values
+function make_tags(builds) {
+    return builds.reduce((acc, image) => {
+        acc[image.image] = image.variants.reduce((acc, version) => {
+            acc[version.nodegit] = version.tags;
+            return acc;
+        }, {})
+        return acc;
+    }, {});
+}
+
+// generate testing image names for access by matrix values
+function make_test_images(builds, image_name) {
     return builds.reduce((acc, image) => {
         acc[image.image] = image.variants.reduce((acc, version) => {
             acc[version.nodegit] = `${image_name}:${version.tags[0]}`
@@ -186,7 +197,8 @@ if (require.main === module) {
             .then((versions) => {
                 let builds = make_build_info(versions.node, versions.nodegit);
                 let buildx_tags = make_buildx_tags(builds, image_name);
-                let test_tags = make_test_tags(builds, image_name);
+                let test_images = make_test_images(builds, image_name);
+                let tags = make_tags(builds);
                 let matrix = make_matrix(versions.node, versions.nodegit);
                 let version_info = make_version_info(versions.node, versions.nodegit);
         
@@ -195,7 +207,8 @@ if (require.main === module) {
                         {
                             matrix: matrix,
                             buildx: buildx_tags,
-                            'test-tags': test_tags,
+                            tags: tags,
+                            'test-images': test_images,
                             'version-info': version_info
                         },
                         null, 2

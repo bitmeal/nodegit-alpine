@@ -6,7 +6,7 @@ jobs:
     outputs:
       matrix: ${{ steps.generate-matrix.outputs.matrix }}
       buildx: ${{ steps.generate-buildx.outputs.buildx }}
-      test-tags: ${{ steps.generate-test-tags.outputs.test-tags }}
+      test-images: ${{ steps.generate-test-images.outputs.test-images }}
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-node@v2
@@ -15,14 +15,14 @@ jobs:
     - name: Fetch Dependencies
       run: sudo apt install -qq -y jq && npm install
     - name: Generate Container Build Info
-      run: node generator bitmeal/nodegit --node-versions 3 --nodegit-versions 3 > manifest.json
+      run: node generator bitmeal/nodegit --node-versions 1 --nodegit-versions 1 > manifest.json
     - name: Export Build Matrix
       id: generate-matrix
       run: echo "::set-output name=matrix::$(jq -c '.matrix' manifest.json)"
     - id: generate-buildx
       run: echo "::set-output name=buildx::$(jq -c '.buildx' manifest.json)"
-    - id: generate-test-tags
-      run: echo "::set-output name=test-tags::$(jq -c '."test-tags"' manifest.json)"
+    - id: generate-test-images
+      run: echo "::set-output name=test-images::$(jq -c '."test-images"' manifest.json)"
   
   image-builder:
     needs: generator
@@ -45,18 +45,46 @@ jobs:
       run: sudo apt install -qq -y jq
     - name: Build local testing Image
       run: |
-        TAG="$(echo '${{needs.generator.outputs.test-tags}}' | jq -r '."${{matrix.image}}"."${{matrix.nodegit}}"')" && 
-        docker buildx build --load --build-arg ALPINE_TAG=${{matrix.image}} --build-arg NODEGIT_VERSION=${{matrix.nodegit}} --tag ${TAG} .
+        IMAGE="$(echo '${{needs.generator.outputs.test-images}}' | jq -r '."${{matrix.image}}"."${{matrix.nodegit}}"')" && 
+        docker buildx build --load --build-arg ALPINE_IMAGE=${{matrix.image}} --build-arg NODEGIT_VERSION=${{matrix.nodegit}} --tag ${IMAGE} .
     - name: Check Nodegit Version
       run: |
-        TAG="$(echo '${{needs.generator.outputs.test-tags}}' | jq -r '."${{matrix.image}}"."${{matrix.nodegit}}"')" && 
-        NODEGIT="$(docker run --rm $TAG /usr/local/bin/npm -g ls | grep '^\+.*\snodegit@' | grep -oP '(\d+\.){2}\d+')" && echo "nodegit versions: ${NODEGIT}"
+        IMAGE="$(echo '${{needs.generator.outputs.test-images}}' | jq -r '."${{matrix.image}}"."${{matrix.nodegit}}"')" && 
+        NODEGIT="$(docker run --rm $IMAGE /usr/local/bin/npm -g ls | grep '^\+.*\snodegit@' | grep -oP '(\d+\.){2}\d+')" && echo "nodegit versions: ${NODEGIT}"
         [ "$NODEGIT" == "${{matrix.nodegit}}" ] && 
         echo "nodegit versions @${{matrix.nodegit}} [ OK ]"
     - name: Test Nodegit
       run: |
-        TAG="$(echo '${{needs.generator.outputs.test-tags}}' | jq -r '."${{matrix.image}}"."${{matrix.nodegit}}"')" && 
-        docker run --rm -v "$(pwd)/test":/test $TAG /bin/ash -c "cp -r /test ~/test && cd ~/test && chmod +x init.sh && ./init.sh && echo using: && cat package.json && npm install && node test.js"
+        IMAGE="$(echo '${{needs.generator.outputs.test-images}}' | jq -r '."${{matrix.image}}"."${{matrix.nodegit}}"')" && 
+        docker run --rm -v "$(pwd)/test":/test $IMAGE /bin/ash -c "cp -r /test ~/test && cd ~/test && chmod +x init.sh && ./init.sh && echo using: && cat package.json && npm install && node test.js"
     - name: Build and push multiarch Images
-      run: docker buildx build  --push --build-arg ALPINE_TAG=${{matrix.image}} --build-arg NODEGIT_VERSION=${{matrix.nodegit}} --platform "linux/amd64,linux/arm64" $(echo '${{needs.generator.outputs.buildx}}' | jq -r '."${{matrix.image}}"."${{matrix.nodegit}}"') .
-      
+      run: docker buildx build  --push --build-arg ALPINE_IMAGE=${{matrix.image}} --build-arg NODEGIT_VERSION=${{matrix.nodegit}} --platform "linux/amd64,linux/arm64" $(echo '${{needs.generator.outputs.buildx}}' | jq -r '."${{matrix.image}}"."${{matrix.nodegit}}"') .
+
+    - name: Prepare status artifact @SUCCESS
+      if: ${{ success() }}
+      run: |
+        echo '{"success": true, "image": "${{matrix.image}}", "nodegit": "${{matrix.nodegit}}"}' | jq . > ${{matrix.image}}@${{matrix.nodegit}}.json
+    - name: Prepare status artifact @FAILURE
+      if: ${{ failure() }}
+      run: |
+        echo '{"success": false, "image": "${{matrix.image}}", "nodegit": "${{matrix.nodegit}}"}' | jq . > ${{matrix.image}}@${{matrix.nodegit}}.json
+    - name: Upload status artifact [${{matrix.image}}@${{matrix.nodegit}}.json]
+      if: ${{ !canceled() }}
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{matrix.image}}@${{matrix.nodegit}}.json
+        path: ${{matrix.image}}@${{matrix.nodegit}}.json
+
+  chronicler:
+    needs: image-builder
+    if: ${{ !canceled() }}
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Fetch matrix jobs status artifacts
+      uses: actions/download-artifact@v2
+      with:
+        path: jobs
+    - name: Display status artifacts layout
+      run: ls -R
+      working-directory: jobs
