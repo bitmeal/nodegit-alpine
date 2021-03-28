@@ -49,7 +49,7 @@ jobs:
     - name: Build local testing Image
       run: |
         IMAGE="$(echo '${{needs.generator.outputs.test-images}}' | jq -r '."${{matrix.image}}"."${{matrix.nodegit}}"')" && 
-        docker buildx build --load --build-arg ALPINE_IMAGE=${{matrix.image}} --build-arg NODEGIT_VERSION=${{matrix.nodegit}} --tag ${IMAGE} .
+        docker buildx build --load --build-arg ALPINE_TAG=${{matrix.image}} --build-arg NODEGIT_VERSION=${{matrix.nodegit}} --tag ${IMAGE} .
     - name: Check Nodegit Version
       run: |
         IMAGE="$(echo '${{needs.generator.outputs.test-images}}' | jq -r '."${{matrix.image}}"."${{matrix.nodegit}}"')" && 
@@ -61,7 +61,7 @@ jobs:
         IMAGE="$(echo '${{needs.generator.outputs.test-images}}' | jq -r '."${{matrix.image}}"."${{matrix.nodegit}}"')" && 
         docker run --rm -v "$(pwd)/test":/test $IMAGE /bin/ash -c "cp -r /test ~/test && cd ~/test && chmod +x init.sh && ./init.sh && echo using: && cat package.json && npm install && node test.js"
     - name: Build and push multiarch Images
-      run: docker buildx build  --push --build-arg ALPINE_IMAGE=${{matrix.image}} --build-arg NODEGIT_VERSION=${{matrix.nodegit}} --platform "linux/amd64,linux/arm64" $(echo '${{needs.generator.outputs.buildx}}' | jq -r '."${{matrix.image}}"."${{matrix.nodegit}}"') .
+      run: docker buildx build  --push --build-arg ALPINE_TAG=${{matrix.image}} --build-arg NODEGIT_VERSION=${{matrix.nodegit}} --platform "linux/amd64,linux/arm64" $(echo '${{needs.generator.outputs.buildx}}' | jq -r '."${{matrix.image}}"."${{matrix.nodegit}}"') .
 
     - name: Prepare status artifact @SUCCESS
       if: ${{ success() }}
