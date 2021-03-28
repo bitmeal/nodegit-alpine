@@ -7,8 +7,8 @@ ARG NODEGIT_VERSION
 
 RUN \
     apk add build-base python libgit2-dev krb5-dev libssh-dev && \
-    npm config set user 0 && npm config set unsafe-perm true && \
-    npm install -g --production nodegit@${NODEGIT_VERSION} && \
+    npm config set --global user 0 && npm config set --global unsafe-perm true && \
+    BUILD_ONLY=true npm install --global nodegit@${NODEGIT_VERSION} && \
     rm -rf /usr/local/lib/node_modules/nodegit/vendor
 
 WORKDIR /opt/linker
@@ -25,7 +25,7 @@ COPY --from=builder /opt/linker /opt/linker/
 
 RUN \
     apk add libgit2 krb5-libs libssh ca-certificates && \
-    npm config set unsafe-perm true
+    npm config set --global unsafe-perm true
 
 
 # ADD .profile /root/
