@@ -21,24 +21,32 @@ const npm_i_alias = ['install', 'i', 'add', 'inst', 'in'];
 
 
 // call npm with given command-line and link 'nodegit' if true
+// returns exit code of operation; if linking fails, will show error and return status of link operation
 function npm_forward(cmdl, link=false) {
     console.log();
     if(link) {
         console.log(chalk.bgCyan(' NPM '), chalk.yellowBright('linking', chalk.italic('nodegit')));
-        proc.spawnSync(
+        let ret = proc.spawnSync(
             npm_bin,
             ['link', 'nodegit'],
             npm_spawn_opts
         );
+
+        if(ret.status != 0) {
+            console.log(chalk.bgRed(' NPM '), chalk.bgRed(' LINK ERROR '), chalk.red('linking global nodegit failed!'));
+            return ret.status;
+        }
     }
     if(cmdl) {
         console.log(chalk.bgGreen(' NPM '), chalk.green('calling as:'));
         console.log(chalk.green('  $'), [npm_bin, ...cmdl].join(' '));
-        proc.spawnSync(
+        let ret = proc.spawnSync(
             npm_bin,
             cmdl,
             npm_spawn_opts
         );
+
+        return ret.status;
     }
 }
 
@@ -106,7 +114,7 @@ argv
                 // console.log('found nodegit dependency in:', manifest);
             }
 
-            npm_forward(process.argv.slice(2), nodegit);
+            process.exit(npm_forward(process.argv.slice(2), nodegit));
         }
         else {
             console.log(chalk.yellowBright('  - testing for ' + chalk.italic('nodegit')));
@@ -126,13 +134,13 @@ argv
                 console.log(chalk.bgRed(' NPM ') + chalk.yellowBright(' new list :'), pkgs);
             }
 
-            npm_forward(pkgs.length ? cmdl : null, nodegit);
+            process.exit(npm_forward(pkgs.length ? cmdl : null, nodegit));
         }
     }
 )
 .command('$0', 'npm passthrough', ()=>{}, ()=>{
     console.log();
     console.log(chalk.bgCyan(' NPM '), chalk.cyan('forwarding call...'));
-    npm_forward(process.argv.slice(2));
+    process.exit(npm_forward(process.argv.slice(2)));
 })
 .argv;
