@@ -72,7 +72,7 @@ jobs:
       run: |
         echo '{"success": false, "image": "${{matrix.image}}", "nodegit": "${{matrix.nodegit}}"}' | jq '.' > ${{matrix.image}}@${{matrix.nodegit}}.json
     - name: Upload status artifact [${{matrix.image}}@${{matrix.nodegit}}.json]
-      if: ${{ !canceled() }}
+      if: ${{ !cancelled() }}
       uses: actions/upload-artifact@v2
       with:
         name: ${{matrix.image}}@${{matrix.nodegit}}.json
@@ -82,7 +82,7 @@ jobs:
     needs:
       - generator
       - image-builder
-    if: ${{ !canceled() }}
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
