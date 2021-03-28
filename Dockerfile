@@ -1,7 +1,6 @@
-ARG ALPINE_TAG
-
 # compile nodegit
 # install 'npm linker'
+ARG ALPINE_TAG
 FROM node:${ALPINE_TAG} AS builder
 ARG NODEGIT_VERSION
 
@@ -17,6 +16,7 @@ RUN chmod +x linker.js && npm install && mkdir bin && ln linker.js ./bin/npm
 
 
 # runner container without bloat
+ARG ALPINE_TAG
 FROM node:${ALPINE_TAG}
 ARG NODEGIT_VERSION
 
