@@ -89,7 +89,7 @@ jobs:
     - name: Fetch Dependencies
       run: sudo apt install -qq -y jq
     - name: Show tags passed from generator
-      run: echo ${{needs.generator.outputs.tags}} | jq '.'
+      run: echo '${{needs.generator.outputs.tags}}' | jq '.'
     - name: Fetch matrix jobs status artifacts
       uses: actions/download-artifact@v2
       with:
