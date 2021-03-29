@@ -1,7 +1,7 @@
+# manifest.json
+jobs/
+status/
+
 node_modules/
 
 .vscode
-
-matrix*.json
-jobs/
-status/
