@@ -101,8 +101,7 @@ jobs:
         path: jobs
     - name: Initialize report [jobs/tags.json]
       run: echo '${{needs.generator.outputs.tags}}' | jq '.' > jobs/tags.json
-    - name: Generate Status info
     - name: Generate Docker Hub Readme [HUB.md]
       run: node report >> HUB.md
-    - name: Debug show Readme [HUB.md]
+    - name: DEBUG show Readme [HUB.md]
       run: cat HUB.md
