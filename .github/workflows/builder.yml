@@ -67,13 +67,19 @@ jobs:
       if: github.ref == 'refs/heads/master'
       run: docker buildx build  --push --build-arg ALPINE_TAG=${{matrix.image}} --build-arg NODEGIT_VERSION=${{matrix.nodegit}} --platform "linux/amd64,linux/arm64" $(echo '${{needs.generator.outputs.buildx}}' | jq -r '."${{matrix.image}}"."${{matrix.nodegit}}"') .
 
-    - name: Build status artifact [${{matrix.image}}@${{matrix.nodegit}}.json]
+    - name: Prepare status artifact [${{matrix.image}}@${{matrix.nodegit}}.json]
       if: ${{ always() }}
-      env:
-        SUCCESS: ${{ success() }}
       run: |
         mkdir status &&
-        echo '{}' | jq --argjson status $SUCCESS --arg run "${GITHUB_RUN_ID}" --arg image "${{matrix.image}}" --arg nodegit "${{matrix.nodegit}}" '. + {success: $status, run: $run, image: $image, nodegit: $nodegit}' > status/${{matrix.image}}@${{matrix.nodegit}}.json
+        echo '{}' | jq --arg run "${GITHUB_RUN_ID}" --arg image "${{matrix.image}}" --arg nodegit "${{matrix.nodegit}}" '. + {run: $run, image: $image, nodegit: $nodegit}' > status/${{matrix.image}}@${{matrix.nodegit}}.json
+    - name: Finalize status artifact @success
+      if: ${{ success() }}
+      run: |
+        cat status/${{matrix.image}}@${{matrix.nodegit}}.json | jq --argjson success true '. + {success: $success}' > status/${{matrix.image}}@${{matrix.nodegit}}.json
+    - name: Finalize status artifact @failure
+      if: ${{ failure() }}
+      run: |
+        cat status/${{matrix.image}}@${{matrix.nodegit}}.json | jq --argjson success false '. + {success: $success}' > status/${{matrix.image}}@${{matrix.nodegit}}.json
     - name: Upload status artifact [${{matrix.image}}@${{matrix.nodegit}}.json]
       if: ${{ !cancelled() }}
       uses: actions/upload-artifact@v2
