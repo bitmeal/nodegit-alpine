@@ -10,8 +10,7 @@
 
 📌***tags***: `[<nodegit-version>-][<node-version>-]alpine`
 
-
-> ⚡ `npm` binary is masked - *[visit repo for more infos](https://github.com/bitmeal/nodegit-alpine)*
+⚡ `npm` binary is masked - *[visit repo for more infos](https://github.com/bitmeal/nodegit-alpine)*
 
 
 ## options

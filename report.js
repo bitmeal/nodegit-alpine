@@ -39,7 +39,7 @@ Object.keys(report).forEach((image) => {
         Object.keys(report[image]).forEach((ng) => {
             let job = report[image][ng];
             let padding = ' '.repeat(max_image_len - job.image.length);
-            console.log('*', job.icon, `[*FROM node:**${job.image}*** ${padding}| *nodegit@**${job.nodegit}***]`, job.tags.map(t => ('`'+t+'`')).join(', '));
+            console.log('*', job.icon, `[FROM node:**${job.image}** ${padding}| nodegit@**${job.nodegit}**]`, job.tags.map(t => ('`'+t+'`')).join(', '));
         });
     }
 );
