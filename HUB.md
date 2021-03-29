@@ -26,14 +26,12 @@
 * the global nodegit module will get linked automatically, when a nodegit dependency is detected
 * calls to `npm` are intercepted and evaluated for automatic linking
 * call `npm` directly as `/usr/local/bin/npm`
-* *manuallly* 'fetch' nodegit as a dependency as `npm install` or `npm link nodegit`
+* *manuallly* 'fetch' nodegit as a dependency npm `npm install`, `npm link nodegit` or `/usr/local/bin/npm install --link`
 
 # tags
 [![builder](https://github.com/bitmeal/nodegit-alpine/actions/workflows/builder.yml/badge.svg)](https://github.com/bitmeal/nodegit-alpine/actions/workflows/builder.yml)
 
 *This list is updated automatically, **for the latest build**, in sync with the container images. The build badge tells wether all containers built successfully, or any failed. The build status per tag (-group) tells wether the tags are included in the last build. Previous versions may be available for tags with failed builds.*
 
-ℹ Click status icon to view build pipeline.
-
-`[[<nodegit-version>-]<node-version>-]alpine`
+**tags format**: `[<nodegit-version>-][<node-version>-]alpine`
 

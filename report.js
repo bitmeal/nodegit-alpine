@@ -25,7 +25,7 @@ let report = jobs.reduce((acc, job) => {
             job,
             {
                 tags: tags[job.image][job.nodegit],
-                link: `https://github.com/bitmeal/nodegit-alpine/runs/${job['run']}`,
+                // link: `https://github.com/bitmeal/nodegit-alpine/runs/${job['run']}`,
                 icon: job['success'] ? '`✔`' : '`❌`',
                 state: job['success'] ? 'success' : 'failure'
             }
@@ -34,10 +34,12 @@ let report = jobs.reduce((acc, job) => {
     }, {});
 
 // print output
+let max_image_len = Object.keys(report).map(image => image.length).sort((a,b) => b-a)[0];
 Object.keys(report).forEach((image) => {
         Object.keys(report[image]).forEach((ng) => {
             let job = report[image][ng];
-            console.log('*', `[${job.icon}](${job.link})`, job.tags.map(t => ('`'+t+'`')).join(', '), `[*FROM node:**${job.image}*** | *nodegit@**${job.nodegit}***]`);
+            let padding = ' '.repeat(max_image_len - job.image.length);
+            console.log('*', job.icon, `[*FROM node:**${job.image}*** ${padding}| *nodegit@**${job.nodegit}***]`, job.tags.map(t => ('`'+t+'`')).join(', '));
         });
     }
 );
