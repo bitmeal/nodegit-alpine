@@ -100,7 +100,7 @@ jobs:
       with:
         check-latest: true
     - name: Fetch Dependencies
-      run: sudo apt install -qq -y jq
+      run: sudo apt install -qq -y jq && npm install
     - name: Fetch matrix jobs status artifacts
       uses: actions/download-artifact@v2
       with:
