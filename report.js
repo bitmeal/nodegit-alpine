@@ -37,7 +37,7 @@ let report = jobs.reduce((acc, job) => {
 Object.keys(report).forEach((image) => {
         Object.keys(report[image]).forEach((ng) => {
             let job = report[image][ng];
-            console.log('*', `[${job.icon}](${job.link})`, job.tags.map(t => ('`'+t+'`')).join(', '));
+            console.log('*', `[${job.icon}](${job.link})`, job.tags.map(t => ('`'+t+'`')).join(', '), `[*FROM node:**${job.image}*** | *nodegit@**${job.nodegit}***]`);
         });
     }
 );

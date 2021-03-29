@@ -48,7 +48,7 @@ jobs:
         password: ${{ secrets.DOCKER_HUB_SECRET }}
     - uses: actions/checkout@v2
     - name: Fetch Dependencies
-      run: sudo apt install -qq -y jq
+      run: sudo apt install -qq -y jq moreutils
     - name: Build local testing Image
       run: |
         IMAGE="$(echo '${{needs.generator.outputs.test-images}}' | jq -r '."${{matrix.image}}"."${{matrix.nodegit}}"')" && 
@@ -75,11 +75,11 @@ jobs:
     - name: Finalize status artifact @success
       if: ${{ success() }}
       run: |
-        cat status/${{matrix.image}}@${{matrix.nodegit}}.json | jq --argjson success true '. + {success: $success}' > status/${{matrix.image}}@${{matrix.nodegit}}.json
+        cat status/${{matrix.image}}@${{matrix.nodegit}}.json | jq --argjson success true '. + {success: $success}' | sponge status/${{matrix.image}}@${{matrix.nodegit}}.json
     - name: Finalize status artifact @failure
       if: ${{ failure() }}
       run: |
-        cat status/${{matrix.image}}@${{matrix.nodegit}}.json | jq --argjson success false '. + {success: $success}' > status/${{matrix.image}}@${{matrix.nodegit}}.json
+        cat status/${{matrix.image}}@${{matrix.nodegit}}.json | jq --argjson success false '. + {success: $success}' | sponge status/${{matrix.image}}@${{matrix.nodegit}}.json
     - name: Upload status artifact [${{matrix.image}}@${{matrix.nodegit}}.json]
       if: ${{ !cancelled() }}
       uses: actions/upload-artifact@v2
@@ -109,5 +109,8 @@ jobs:
       run: echo '${{needs.generator.outputs.tags}}' | jq '.' > jobs/tags.json
     - name: Generate Docker Hub Readme [HUB.md]
       run: node report >> HUB.md
-    - name: DEBUG show Readme [HUB.md]
-      run: cat HUB.md
+    - name: Upload HUB.md
+      uses: actions/upload-artifact@v2
+      with:
+        name: HUB.md
+        path: HUB.md

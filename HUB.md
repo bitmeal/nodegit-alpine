@@ -8,7 +8,7 @@
 
 🗃 [bitmeal/nodegit-alpine](https://github.com/bitmeal/nodegit-alpine)*@github*
 
-📌***tags***: `[[<nodegit-version>-]<node-version>-]alpine`
+📌***tags***: `[<nodegit-version>-][<node-version>-]alpine`
 
 
 > ⚡ `npm` binary is masked - *[visit repo for more infos](https://github.com/bitmeal/nodegit-alpine)*
@@ -29,7 +29,7 @@
 * *manuallly* 'fetch' nodegit as a dependency as `npm install` or `npm link nodegit`
 
 # tags
-![builder status](https://github.com/bitmeal/nodegit-alpine/actions/workflows/builder.yml/badge.svg?branch=master) 
+[![builder](https://github.com/bitmeal/nodegit-alpine/actions/workflows/builder.yml/badge.svg)](https://github.com/bitmeal/nodegit-alpine/actions/workflows/builder.yml)
 
 *This list is updated automatically, **for the latest build**, in sync with the container images. The build badge tells wether all containers built successfully, or any failed. The build status per tag (-group) tells wether the tags are included in the last build. Previous versions may be available for tags with failed builds.*
 
