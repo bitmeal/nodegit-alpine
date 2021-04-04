@@ -3,6 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const glob = require('fast-glob').sync;
+const semver = require('semver');
 
 
 const tags_path = './jobs/tags.json';
@@ -35,8 +36,16 @@ let report = jobs.reduce((acc, job) => {
 
 // print output
 let max_image_len = Object.keys(report).map(image => image.length).sort((a,b) => b-a)[0];
-Object.keys(report).forEach((image) => {
-        Object.keys(report[image]).forEach((ng) => {
+[
+    'alpine',
+    'lts-alpine',
+    ...Object.keys(report)
+        .filter(i => i.match(/\d+-alpine/))
+        .sort((a,b) => a.match(/^\d+/)[0] - b.match(/^\d+/)[0])
+].forEach((image) => {
+        Object.keys(report[image])
+        .sort(semver.rcompare)
+        .forEach((ng) => {
             let job = report[image][ng];
             let padding = ' '.repeat(max_image_len - job.image.length);
             console.log('*', job.icon, `[FROM node:**${job.image}** ${padding}| nodegit@**${job.nodegit}**]`, job.tags.map(t => ('`'+t+'`')).join(', '));
