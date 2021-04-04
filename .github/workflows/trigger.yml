@@ -40,8 +40,9 @@ jobs:
       run: node generator bitmeal/nodegit --node-versions 3 --nodegit-versions 3 > manifest-check.json
     - name: Test node:alpine container versions against expected node versions
       id: check-containers
-      run: (for version in $(cat manifest-check.json | jq -r '."version-info".node[]'); do [ "$(docker run --rm node:$(echo ${version} | grep -oP '^\d+')-alpine node --version)" == "v${version}" ] && echo "${version} [OK]" || (echo "${version} [FAILED]"; false); done) && (echo "Container node versions match [OK]"; echo "::set-output name=match::true") || (echo "Container node versions DON'T match [FAILED]")
+      run: (for version in $(cat manifest-check.json | jq -r '."version-info".node[]'); do (docker pull node:$(echo ${version} | grep -oP '^\d+')-alpine && [ "$(docker run --rm node:$(echo ${version} | grep -oP '^\d+')-alpine node --version)" == "v${version}" ]) && echo "${version} [OK]" || (echo "${version} [FAILED]"; false); done) && (echo "Container node versions match [OK]"; echo "::set-output name=match::true") || (echo "Container node versions DON'T match [FAILED]")
     - uses: actions/upload-artifact@v2
+      if: steps.check-containers.outputs.match
       with:
         name: manifest.json
         path: manifest-check.json
@@ -52,11 +53,15 @@ jobs:
     if: needs.check-versions.outputs.match
     steps:
     - uses: actions/checkout@v2
+    - name: DEBUG clear manifest.json
+      run: rm manifest.json
     - name: Fetch manifest.json
       uses: actions/download-artifact@v2
       with:
         name: manifest.json
-    - name: DEBUG show manifest-check.json
+    - name: DEBUG show directory structure
+      run: ls -R
+    - name: DEBUG show manifest.json
       run: cat manifest.json
 
 
