@@ -9,6 +9,8 @@ const path = require('path');
 const log = require('loglevel');
 const chalk = require('chalk');
 
+const util = require('util');
+
 
 // hardcoded path (this is intended for single use in one container...)
 const npm_bin = '/usr/local/bin/npm';
@@ -52,6 +54,42 @@ function npm_forward(cmdl, link=false) {
 }
 
 
+// find and load file as object by name from cwd or parent
+// intended to find package.json and package-lock.json
+function load_pkg_info(name) {
+    log.info(chalk.yellowBright('  - searching for', chalk.italic(name)));
+
+    const paths = Array(
+            process.cwd().split(path.sep).length - 1
+        )
+        .fill('..')
+        .reduce((acc, p)=>{
+            acc.push(path.join(acc.slice(-1)[0], p));
+            return acc;
+        }, ['.'])
+        .map(p => path.resolve(process.cwd(), p, name));
+
+    const manifest = paths.reduce((acc, p) => {
+            if(fs.existsSync(p)) {
+                acc.push(p);
+            }
+            return acc;
+        }, [])[0];
+
+    let pkg = {};
+    if(manifest) {
+        try {
+            pkg = require(manifest);
+            log.info(chalk.yellowBright('  - loading', chalk.italic(name), 'OK'));
+        } catch (error) {
+            log.error(chalk.redBright('  - loading', chalk.italic(name), 'FAILED'));
+        }
+    }
+
+    return pkg;
+}
+
+
 //// main
 // silence npm linker?
 log.setLevel(process.env['NODEGIT_LINK_SILENT'] ? 'silent' : 'info');
@@ -92,44 +130,39 @@ else {
         },
         (iargv) => {
             if(iargv.pkgs.length == 0) {
-                log.info(chalk.yellowBright('  - searching for ' + chalk.italic('package.json')));
-                
-                const paths = Array(
-                        process.cwd().split(path.sep).length - 1
-                    )
-                    .fill('..')
-                    .reduce((acc, p)=>{
-                        acc.push(path.join(acc.slice(-1)[0], p));
-                        return acc;
-                    }, ['.'])
-                    .map(p => path.resolve(process.cwd(), p, 'package.json'));
-                
-                const manifest = paths.reduce((acc, p) => {
-                        if(fs.existsSync(p)) {
-                            acc.push(p);
-                        }
-                        return acc;
-                    }, [])[0];
-                
-                let pkg = {};
-                if(manifest) {
-                    try {
-                        pkg = require(manifest);
-                    } catch (error) { /* ignore */ }
-                }
+                let pkg = load_pkg_info('package.json');
+                let pkg_lock = load_pkg_info('package-lock.json');
 
-                let nodegit = Object.values(pkg)
-                    .filter(v => typeof(v) === 'object' && v != null)
-                    .map(o => Object.keys(o))
-                    .flat()
-                    .includes('nodegit');
+                let deplist = (mod) => {
+                    return Object.keys(mod)
+                        .filter(k => (k.includes('dep') || k.includes('req')))
+                        .filter(k => typeof(mod[k]) === 'object')
+                        .map((d) => {
+                            return Array.isArray(mod[d]) ? mod[d] : Object.keys(mod[d]);
+                        })
+                        .flat();
+                };
                 
-                if(nodegit) {
-                    log.info('');
-                    log.info(chalk.bgRed(' NPM ') + chalk.yellowBright(' found', chalk.italic('nodegit'), 'dependency in:', chalk.italic(manifest)));
-                    // log.info('found nodegit dependency in:', manifest);
-                }
+                let deps = {
+                    pkg: deplist(pkg),
+                    lock: Object.keys(pkg_lock['packages'] || {})
+                        .map(p => [p.replace('node_modules/', ''), ...deplist((pkg_lock['packages'] || {})[p])])
+                        .flat()
+                };
+                console.log(util.inspect(deps, {showHidden: false, maxArrayLength: null, colors: true}));
 
+                log.info('');
+
+                let nodegit = false;
+                if(deps.pkg.includes('nodegit')) {
+                    nodegit = true;
+                    log.info(chalk.bgRed(' NPM ') + chalk.yellowBright(' found', chalk.italic('nodegit'), 'dependency from:', chalk.italic('package.json')));
+                }
+                else if(deps.lock.includes('nodegit')) {
+                    nodegit = true;
+                    log.info(chalk.bgRed(' NPM ') + chalk.yellowBright(' found', chalk.italic('nodegit'), 'dependency from:', chalk.italic('package-lock.json')));
+                }
+                
                 process.exit(npm_forward(process.argv.slice(2), nodegit));
             }
             else {
