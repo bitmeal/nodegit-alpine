@@ -10,14 +10,8 @@ jobs:
       test-images: ${{ steps.generate-test-images.outputs.test-images }}
     steps:
     - uses: actions/checkout@v2
-    - name: Setup Node.js
-      uses: actions/setup-node@v2
-      with:
-        check-latest: true
     - name: Fetch Dependencies
-      run: sudo apt install -qq -y jq && npm install
-    - name: Generate Container Build Info
-      run: node generator bitmeal/nodegit --node-versions 3 --nodegit-versions 3 > manifest.json
+      run: sudo apt install -qq -y jq
     - name: Export Build Matrix
       id: generate-matrix
       run: echo "::set-output name=matrix::$(jq -c '.matrix' manifest.json)"
