@@ -27,7 +27,7 @@ let report = jobs.reduce((acc, job) => {
             {
                 tags: tags[job.image][job.nodegit],
                 // link: `https://github.com/bitmeal/nodegit-alpine/runs/${job['run']}`,
-                icon: job['success'] ? '`✔`' : '`❌`',
+                icon: job['success'] ? '✔' : '❌',
                 state: job['success'] ? 'success' : 'failure'
             }
         );
