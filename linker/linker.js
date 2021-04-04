@@ -20,7 +20,7 @@ const npm_spawn_opts = {
     stdio: 'inherit'
 };
 // install aliases
-const npm_i_alias = ['install', 'i', 'add', 'inst', 'in'];
+const npm_i_alias = ['install', 'i', 'add', 'inst', 'in', 'install-test', 'ci', 'npm-install-ci-test'];
 
 
 // call npm with given command-line and link 'nodegit' if true
