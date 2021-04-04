@@ -15,11 +15,14 @@ jobs:
     - name: Export Build Matrix
       id: generate-matrix
       run: echo "::set-output name=matrix::$(jq -c '.matrix' manifest.json)"
-    - id: generate-buildx
+    - name: Export docker build/buildx tags
+      id: generate-buildx
       run: echo "::set-output name=buildx::$(jq -c '.buildx' manifest.json)"
-    - id: generate-tags
+    - name: Export tag list
+      id: generate-tags
       run: echo "::set-output name=tags::$(jq -c '.tags' manifest.json)"
-    - id: generate-test-images
+    - name: Export testing image names/tags
+      id: generate-test-images
       run: echo "::set-output name=test-images::$(jq -c '."test-images"' manifest.json)"
   
   image-builder:
