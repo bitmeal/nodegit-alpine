@@ -1,0 +1,61 @@
+name: trigger
+on:
+  schedule:
+  - cron: "0 0 * * *"
+jobs:
+  check-updates:
+    runs-on: ubuntu-latest
+    outputs:
+      diff: ${{ steps.check-versions.outputs.diff }}
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup Node.js
+      uses: actions/setup-node@v2
+      with:
+        check-latest: true
+    - name: Fetch Dependencies
+      run: sudo apt install -qq -y jq && npm install
+    - name: Generate Container Build Info
+      run: node generator bitmeal/nodegit --node-versions 3 --nodegit-versions 3 > manifest-check.json
+    - name: Test for new Node or Nodegit versions
+      id: check-versions
+      run: diff -q manifest.json manifest-check.json && (echo "No updates"; echo "::set-output name=diff::false") || (echo "New versions detected; check container versions."; echo "::set-output name=diff::true")
+
+  check-versions:
+    runs-on: ubuntu-latest
+    outputs:
+      match: ${{ steps.check-containers.outputs.match }}
+    needs: check-updates
+    if: needs.check-updates.outputs.diff
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup Node.js
+      uses: actions/setup-node@v2
+      with:
+        check-latest: true
+    - name: Fetch Dependencies
+      run: sudo apt install -qq -y jq && npm install
+    - name: Generate Container Build Info
+      run: node generator bitmeal/nodegit --node-versions 3 --nodegit-versions 3 > manifest-check.json
+    - name: Test node:alpine container versions against expected node versions
+      id: check-containers
+      run: (for version in $(cat manifest-check.json | jq -r '."version-info".node[]'); do [ "$(docker run --rm node:$(echo ${version} | grep -E -o '^\d+')-alpine node --version)" == "v${version}" ] && echo "${version} [OK]" || (echo "${version} [FAILED]"; false); done) && (echo "Container node versions match [OK]"; echo "::set-output name=match::true") || (echo "Container node versions DON'T match [FAILED]"; echo "::set-output name=match::false")
+    - uses: actions/upload-artifact@v2
+      with:
+        name: manifest.json
+        path: manifest-check.json
+
+  trigger:
+    runs-on: ubuntu-latest
+    needs: check-versions
+    if: needs.check-versions.outputs.match
+    steps:
+    - uses: actions/checkout@v2
+    - name: Fetch manifest.json
+      uses: actions/download-artifact@v2
+      with:
+        name: manifest.json
+    - name: DEBUG show manifest-check.json
+      run: cat manifest.json
+
+
