@@ -10,12 +10,22 @@
 
 📌***tags***: `[<nodegit-version>-][<node-version>-]alpine`
 
-⚡ `npm` binary is masked - *[visit repo for more infos](https://github.com/bitmeal/nodegit-alpine)*
+
+## fixing those errors
+👁‍🗨 match the containers and your requested (`package.json`/`package-lock.json`) nodegit versions
+
+🚫 try ignoring (and rebuilding) your `package-lock.json` in the container
+
+⚡ when debugging, remember: `npm` binary is masked - *[visit repo for more infos](https://github.com/bitmeal/nodegit-alpine)*
 
 
 ## options
 * `NODEGIT_LINK_SILENT`: disables output of `npm` interception and link process
 * `NODEGIT_LINK_OFF`: disables automatic nodegit linking
+* `NODEGIT_LINK_ALWAYS`: always link global nodegit, independently of detection result
+* `NODEGIT_IGNORE_PACKAGE_LOCK`: ignore `package-lock.json` when searching for nodegit dependency
+* `NPM_LINK`: append `--link` to npm install (and aliases) per default
+* `NPM_NO_PACKAGE_LOCK`: use npm with `--no-package-lock` option
 
 
 ## overview
@@ -25,7 +35,7 @@
 * the global nodegit module will get linked automatically, when a nodegit dependency is detected
 * calls to `npm` are intercepted and evaluated for automatic linking
 * call `npm` directly as `/usr/local/bin/npm`
-* *manuallly* 'fetch' nodegit as a dependency npm `npm install`, `npm link nodegit` or `/usr/local/bin/npm install --link`
+* *manually* 'fetch' nodegit as a dependency npm `npm install`, `npm link nodegit` or `/usr/local/bin/npm install --link`
 
 # tags
 [![builder](https://github.com/bitmeal/nodegit-alpine/actions/workflows/builder.yml/badge.svg)](https://github.com/bitmeal/nodegit-alpine/actions/workflows/builder.yml)

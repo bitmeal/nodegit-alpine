@@ -41,6 +41,13 @@ function npm_forward(cmdl, link=false) {
         }
     }
     if(cmdl) {
+        if(process.env['NPM_LINK']) {
+            cmdl.push('--link');
+        }
+        if(process.env['NPM_NO_PACKAGE_LOCK']) {
+            cmdl.push('--no-package-lock');
+        }
+
         log.info(chalk.bgGreen(' NPM '), chalk.green('calling as:'));
         log.info(chalk.green('  $'), [npm_bin, ...cmdl].join(' '));
         let ret = proc.spawnSync(
@@ -130,42 +137,57 @@ else {
         },
         (iargv) => {
             if(iargv.pkgs.length == 0) {
-                let pkg = load_pkg_info('package.json');
-                let pkg_lock = load_pkg_info('package-lock.json');
-
-                let deplist = (mod) => {
-                    return Object.keys(mod)
-                        .filter(k => (k.includes('dep') || k.includes('req')))
-                        .filter(k => typeof(mod[k]) === 'object')
-                        .map((d) => {
-                            return Array.isArray(mod[d]) ? mod[d] : Object.keys(mod[d]);
-                        })
-                        .flat();
-                };
-                
-                let deps = {
-                    pkg: deplist(pkg),
-                    lock: Object.keys(pkg_lock['packages'] || {})
-                        .map(p => [p.replace('node_modules/', ''), ...deplist((pkg_lock['packages'] || {})[p])])
-                        .flat()
-                };
-                console.log(util.inspect(deps, {showHidden: false, maxArrayLength: null, colors: true}));
-
-                log.info('');
-
                 let nodegit = false;
-                if(deps.pkg.includes('nodegit')) {
-                    nodegit = true;
-                    log.info(chalk.bgRed(' NPM ') + chalk.yellowBright(' found', chalk.italic('nodegit'), 'dependency from:', chalk.italic('package.json')));
+                // shall link unconditionally?
+                if(!process.env['NODEGIT_LINK_ALWAYS']) {
+                    // test for dependency in package.json and package-lock.json
+                    let pkg = load_pkg_info('package.json');
+
+                    let pkg_lock = {};
+                    if(!process.env['NODEGIT_IGNORE_PACKAGE_LOCK']) {
+                        pkg_lock = load_pkg_info('package-lock.json');
+                    }
+                    else {
+                        log.info(chalk.bgCyan(' NPM ') + chalk.yellowBright(' ignoring dependencies from', chalk.italic('package-lock.json [NODEGIT_IGNORE_PACKAGE_LOCK]')));
+                    }
+
+                    let deplist = (mod) => {
+                        return Object.keys(mod)
+                            .filter(k => (k.includes('dep') || k.includes('req')))
+                            .filter(k => typeof(mod[k]) === 'object')
+                            .map((d) => {
+                                return Array.isArray(mod[d]) ? mod[d] : Object.keys(mod[d]);
+                            })
+                            .flat();
+                    };
+                    
+                    let deps = {
+                        pkg: deplist(pkg),
+                        lock: Object.keys(pkg_lock['packages'] || {})
+                            .map(p => [p.replace('node_modules/', ''), ...deplist((pkg_lock['packages'] || {})[p])])
+                            .flat()
+                    };
+
+                    log.info('');
+
+                    if(deps.pkg.includes('nodegit')) {
+                        nodegit = true;
+                        log.info(chalk.bgRed(' NPM ') + chalk.yellowBright(' found', chalk.italic('nodegit'), 'dependency from:', chalk.italic('package.json')));
+                    }
+                    else if(deps.lock.includes('nodegit')) {
+                        nodegit = true;
+                        log.info(chalk.bgRed(' NPM ') + chalk.yellowBright(' found', chalk.italic('nodegit'), 'dependency from:', chalk.italic('package-lock.json')));
+                    }
                 }
-                else if(deps.lock.includes('nodegit')) {
+                else {
                     nodegit = true;
-                    log.info(chalk.bgRed(' NPM ') + chalk.yellowBright(' found', chalk.italic('nodegit'), 'dependency from:', chalk.italic('package-lock.json')));
+                    log.info(chalk.bgRed(' NPM ') + chalk.yellowBright(' requested link with ', chalk.italic('NODEGIT_LINK_ALWAYS')));
                 }
                 
                 process.exit(npm_forward(process.argv.slice(2), nodegit));
             }
             else {
+                // test for direct install request 'npm install nodegit'
                 log.info(chalk.yellowBright('  - testing for ' + chalk.italic('nodegit')));
 
                 let nodegit_pkgs = iargv.pkgs.filter(p => p.match(/nodegit/));
@@ -182,6 +204,12 @@ else {
                     log.info(chalk.bgRed(' NPM ') + chalk.yellowBright(' removed  :'), nodegit_pkgs);
                     log.info(chalk.bgRed(' NPM ') + chalk.yellowBright(' new list :'), pkgs);
                 }
+
+                // shall link unconditionally?
+                if(process.env['NODEGIT_LINK_ALWAYS']) {
+                    log.info(chalk.bgRed(' NPM ') + chalk.yellowBright(' requested link with ', chalk.italic('NODEGIT_LINK_ALWAYS')));
+                }
+                nodegit = Boolean(process.env['NODEGIT_LINK_ALWAYS'] || nodegit);
 
                 process.exit(npm_forward(pkgs.length ? cmdl : null, nodegit));
             }
