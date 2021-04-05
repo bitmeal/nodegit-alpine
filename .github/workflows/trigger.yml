@@ -1,8 +1,9 @@
 name: trigger
 on:
-  workflow_dispatch:
   schedule:
-  - cron: '0 1 * * *'
+  - cron: '30 1 * * *'
+  workflow_dispatch:
+
 jobs:
   check-updates:
     runs-on: ubuntu-latest
