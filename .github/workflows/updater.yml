@@ -1,7 +1,8 @@
 name: updater
 on:
   schedule:
-  - cron: '15 * * * *'
+  - cron: '30 */12 * * *'
+  workflow_dispatch:
 
 jobs:
   check-updates:
