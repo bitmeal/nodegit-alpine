@@ -41,7 +41,7 @@ let max_image_len = Object.keys(report).map(image => image.length).sort((a,b) =>
     'lts-alpine',
     ...Object.keys(report)
         .filter(i => i.match(/\d+-alpine/))
-        .sort((a,b) => a.match(/^\d+/)[0] - b.match(/^\d+/)[0])
+        .sort((a,b) => b.match(/^\d+/)[0] - a.match(/^\d+/)[0])
 ].forEach((image) => {
         Object.keys(report[image])
         .sort(semver.rcompare)
