@@ -1,5 +1,8 @@
 name: builder
-on: push
+on:
+  push:
+  workflow_dispatch:
+
 jobs:
   generator:
     runs-on: ubuntu-latest
