@@ -7,7 +7,8 @@ FROM node:${ALPINE_TAG} AS builder
 ARG NODEGIT_VERSION
 
 RUN \
-    apk add build-base python libgit2-dev krb5-dev libssh-dev && \
+    (apk add python || apk add python3) && \
+    apk add build-base libgit2-dev krb5-dev libssh-dev && \
     npm config set --global user 0 && npm config set --global unsafe-perm true && \
     BUILD_ONLY=true npm install --global nodegit@${NODEGIT_VERSION} && \
     rm -rf /usr/local/lib/node_modules/nodegit/vendor
