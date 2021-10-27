@@ -3,8 +3,8 @@
     "image": [
       "lts-alpine",
       "17-alpine",
-      "14-alpine",
-      "12-alpine"
+      "16-alpine",
+      "14-alpine"
     ],
     "nodegit": [
       "0.27.0",
@@ -32,15 +32,15 @@
       "0.26.5": "--tag bitmeal/nodegit:0.26-17-alpine",
       "0.25.1": "--tag bitmeal/nodegit:0.25-17-alpine"
     },
+    "16-alpine": {
+      "0.27.0": "--tag bitmeal/nodegit:0.27-16-alpine --tag bitmeal/nodegit:0.27-gallium-alpine --tag bitmeal/nodegit:16-alpine --tag bitmeal/nodegit:gallium-alpine --tag bitmeal/nodegit:latest-16-alpine --tag bitmeal/nodegit:latest-gallium-alpine",
+      "0.26.5": "--tag bitmeal/nodegit:0.26-16-alpine --tag bitmeal/nodegit:0.26-gallium-alpine",
+      "0.25.1": "--tag bitmeal/nodegit:0.25-16-alpine --tag bitmeal/nodegit:0.25-gallium-alpine"
+    },
     "14-alpine": {
       "0.27.0": "--tag bitmeal/nodegit:0.27-14-alpine --tag bitmeal/nodegit:0.27-fermium-alpine --tag bitmeal/nodegit:14-alpine --tag bitmeal/nodegit:fermium-alpine --tag bitmeal/nodegit:latest-14-alpine --tag bitmeal/nodegit:latest-fermium-alpine",
       "0.26.5": "--tag bitmeal/nodegit:0.26-14-alpine --tag bitmeal/nodegit:0.26-fermium-alpine",
       "0.25.1": "--tag bitmeal/nodegit:0.25-14-alpine --tag bitmeal/nodegit:0.25-fermium-alpine"
-    },
-    "12-alpine": {
-      "0.27.0": "--tag bitmeal/nodegit:0.27-12-alpine --tag bitmeal/nodegit:0.27-erbium-alpine --tag bitmeal/nodegit:12-alpine --tag bitmeal/nodegit:erbium-alpine --tag bitmeal/nodegit:latest-12-alpine --tag bitmeal/nodegit:latest-erbium-alpine",
-      "0.26.5": "--tag bitmeal/nodegit:0.26-12-alpine --tag bitmeal/nodegit:0.26-erbium-alpine",
-      "0.25.1": "--tag bitmeal/nodegit:0.25-12-alpine --tag bitmeal/nodegit:0.25-erbium-alpine"
     }
   },
   "tags": {
@@ -77,6 +77,24 @@
         "0.25-17-alpine"
       ]
     },
+    "16-alpine": {
+      "0.27.0": [
+        "0.27-16-alpine",
+        "0.27-gallium-alpine",
+        "16-alpine",
+        "gallium-alpine",
+        "latest-16-alpine",
+        "latest-gallium-alpine"
+      ],
+      "0.26.5": [
+        "0.26-16-alpine",
+        "0.26-gallium-alpine"
+      ],
+      "0.25.1": [
+        "0.25-16-alpine",
+        "0.25-gallium-alpine"
+      ]
+    },
     "14-alpine": {
       "0.27.0": [
         "0.27-14-alpine",
@@ -94,24 +112,6 @@
         "0.25-14-alpine",
         "0.25-fermium-alpine"
       ]
-    },
-    "12-alpine": {
-      "0.27.0": [
-        "0.27-12-alpine",
-        "0.27-erbium-alpine",
-        "12-alpine",
-        "erbium-alpine",
-        "latest-12-alpine",
-        "latest-erbium-alpine"
-      ],
-      "0.26.5": [
-        "0.26-12-alpine",
-        "0.26-erbium-alpine"
-      ],
-      "0.25.1": [
-        "0.25-12-alpine",
-        "0.25-erbium-alpine"
-      ]
     }
   },
   "test-images": {
@@ -128,22 +128,22 @@
       "0.26.5": "bitmeal/nodegit:0.26-17-alpine",
       "0.25.1": "bitmeal/nodegit:0.25-17-alpine"
     },
+    "16-alpine": {
+      "0.27.0": "bitmeal/nodegit:0.27-16-alpine",
+      "0.26.5": "bitmeal/nodegit:0.26-16-alpine",
+      "0.25.1": "bitmeal/nodegit:0.25-16-alpine"
+    },
     "14-alpine": {
       "0.27.0": "bitmeal/nodegit:0.27-14-alpine",
       "0.26.5": "bitmeal/nodegit:0.26-14-alpine",
       "0.25.1": "bitmeal/nodegit:0.25-14-alpine"
-    },
-    "12-alpine": {
-      "0.27.0": "bitmeal/nodegit:0.27-12-alpine",
-      "0.26.5": "bitmeal/nodegit:0.26-12-alpine",
-      "0.25.1": "bitmeal/nodegit:0.25-12-alpine"
     }
   },
   "version-info": {
     "node": [
       "17.0.1",
-      "14.18.1",
-      "12.22.7"
+      "16.13.0",
+      "14.18.1"
     ],
     "nodegit": [
       "0.27.0",
