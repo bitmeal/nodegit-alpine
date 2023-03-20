@@ -2,5 +2,8 @@
 *.sh	        text eol=lf
 *.bash	        text eol=lf
 
+# make js files use lf only, for shebangs to work correctly
+*.js	        text eol=lf
+
 # explicit files/directories
 linker/bin/**   text eol=lf

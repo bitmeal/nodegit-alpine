@@ -1,25 +1,20 @@
 #!/usr/bin/env node
 
-// const argv = require('yargs');
 import yargs from 'yargs';
-// const proc = require('child_process')
+
 import child_process from 'child_process';
 
-// const fs = require('fs');
 import fs from 'fs';
-// const path = require('path');
 import path from 'path';
 
-// const log = require('loglevel');
 import log from 'loglevel';
-
-// const chalk = require('chalk');
 import chalk from 'chalk';
 
-// // const util = require('util');
-// import util from 'util';
+// build require function (may use JSON.parse() and fs.readFileSync instead)
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
 
-// hardcoded path (this is intended for single use in one container...)
+// hardcoded path (intended for exclusive use in official node:alpine containers only)
 const npm_bin = '/usr/local/bin/npm';
 const npm_spawn_opts = {
     cwd: process.cwd(),
