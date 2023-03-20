@@ -82,7 +82,7 @@ jobs:
         cat status/${{matrix.image}}@${{matrix.nodegit}}.json | jq --argjson success false '. + {success: $success}' | sponge status/${{matrix.image}}@${{matrix.nodegit}}.json
     - name: Upload status artifact [${{matrix.image}}@${{matrix.nodegit}}.json]
       if: ${{ !cancelled() }}
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: status
         path: status/
