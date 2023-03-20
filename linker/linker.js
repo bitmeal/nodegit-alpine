@@ -1,16 +1,23 @@
 #!/usr/bin/env node
 
-const argv = require('yargs');
-const proc = require('child_process')
+// const argv = require('yargs');
+import yargs from 'yargs';
+// const proc = require('child_process')
+import child_process from 'child_process';
 
-const fs = require('fs');
-const path = require('path');
+// const fs = require('fs');
+import fs from 'fs';
+// const path = require('path');
+import path from 'path';
 
-const log = require('loglevel');
-const chalk = require('chalk');
+// const log = require('loglevel');
+import log from 'loglevel';
 
-const util = require('util');
+// const chalk = require('chalk');
+import chalk from 'chalk';
 
+// // const util = require('util');
+// import util from 'util';
 
 // hardcoded path (this is intended for single use in one container...)
 const npm_bin = '/usr/local/bin/npm';
@@ -29,7 +36,7 @@ function npm_forward(cmdl, link=false) {
     log.info('');
     if(link) {
         log.info(chalk.bgCyan(' NPM '), chalk.yellowBright('linking', chalk.italic('nodegit')));
-        let ret = proc.spawnSync(
+        let ret = child_process.spawnSync(
             npm_bin,
             ['link', 'nodegit'],
             npm_spawn_opts
@@ -50,7 +57,7 @@ function npm_forward(cmdl, link=false) {
 
         log.info(chalk.bgGreen(' NPM '), chalk.green('calling as:'));
         log.info(chalk.green('  $'), [npm_bin, ...cmdl].join(' '));
-        let ret = proc.spawnSync(
+        let ret = child_process.spawnSync(
             npm_bin,
             cmdl,
             npm_spawn_opts
@@ -120,7 +127,7 @@ else {
     *  - install with package names: strip all '.*nodegit.*' packages from list, link and forward to npm
     *  - call to another npm command: just forward
     */
-    argv
+    yargs(process.argv.slice(2))
     .parserConfiguration( { /* 'nargs-eats-options': true */ } )
     // 
     .nargs( process.argv
@@ -131,8 +138,8 @@ else {
     .command(
         npm_i_alias.map(i => `${i} [pkgs..]`),
         'intercept npm install calls',
-        (yargs) => {
-            return yargs
+        (args) => {
+            return args
                 .positional('pkgs', {});
         },
         (iargv) => {

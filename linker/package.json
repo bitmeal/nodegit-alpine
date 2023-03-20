@@ -1,13 +1,17 @@
 {
   "name": "alpine-nodegit-npm-linker",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "intercepting npm install command (and its aliases) to link global nodgit package",
-  "main": "linker.js",
   "author": "Arne Wendt (@bitmeal)",
   "license": "MPL-2.0",
+  "type": "module",
+  "exports": "./linker.js",
+  "engines": {
+    "node": ">=14"
+  },
   "dependencies": {
-    "chalk": "^4.1.0",
-    "loglevel": "^1.7.1",
-    "yargs": "^16.2.0"
+    "chalk": "^5.2.0",
+    "loglevel": "^1.8.1",
+    "yargs": "^17.7.1"
   }
 }
