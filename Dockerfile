@@ -16,7 +16,10 @@ RUN \
 
 WORKDIR /opt/linker
 ADD linker .
-RUN chmod +x linker.js && npm install && mkdir bin && ln linker.js ./bin/npm
+RUN \
+    npm install && \
+    chmod +x linker.js && \
+    chmod +x bin/npm
 
 
 # runner container without bloat
