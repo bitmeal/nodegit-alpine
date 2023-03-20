@@ -1,4 +1,4 @@
-#!/usr/bin/env/ sh
+#!/usr/bin/env sh
 
 LINKER_DIR=$(readlink -f $(dirname $(realpath ${BASH_SOURCE:-$0}))/../)
 
