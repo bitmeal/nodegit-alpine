@@ -10,9 +10,9 @@ jobs:
     outputs:
       diff: ${{ steps.check-versions.outputs.diff }}
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Setup Node.js
-      uses: actions/setup-node@v2
+      uses: actions/setup-node@v3
       with:
         check-latest: true
     - name: Fetch Dependencies
@@ -21,7 +21,7 @@ jobs:
       run: node generator bitmeal/nodegit --node-versions 3 --nodegit-versions 3 > manifest-check.json
     - name: Test for new Node or Nodegit versions
       id: check-versions
-      run: diff -q manifest.json manifest-check.json && (echo "No updates") || (echo "New versions detected; check container versions."; echo "::set-output name=diff::true")
+      run: diff -q manifest.json manifest-check.json && (echo "No updates") || (echo "New versions detected; check container versions."; echo "diff=true" >> ${GITHUB_OUTPUT})
 
   check-versions:
     runs-on: ubuntu-latest
@@ -30,9 +30,9 @@ jobs:
     needs: check-updates
     if: needs.check-updates.outputs.diff
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Setup Node.js
-      uses: actions/setup-node@v2
+      uses: actions/setup-node@v3
       with:
         check-latest: true
     - name: Fetch Dependencies
@@ -41,13 +41,13 @@ jobs:
       run: node generator bitmeal/nodegit --node-versions 3 --nodegit-versions 3 > manifest-check.json
     - name: Test node:alpine container versions against expected node versions
       id: check-containers
-      run: (for version in $(cat manifest-check.json | jq -r '."version-info".node[]'); do (docker pull node:$(echo ${version} | grep -oP '^\d+')-alpine && [ "$(docker run --rm node:$(echo ${version} | grep -oP '^\d+')-alpine node --version)" == "v${version}" ]) && echo "${version} [OK]" || (echo "${version} [FAILED]"; false); done) && (echo "Container node versions match [OK]"; echo "::set-output name=match::true") || (echo "Container node versions DON'T match [FAILED]")
+      run: (for version in $(cat manifest-check.json | jq -r '."version-info".node[]'); do (docker pull node:$(echo ${version} | grep -oP '^\d+')-alpine && [ "$(docker run --rm node:$(echo ${version} | grep -oP '^\d+')-alpine node --version)" == "v${version}" ]) && echo "${version} [OK]" || (echo "${version} [FAILED]"; false); done) && (echo "Container node versions match [OK]"; echo "match=true" >> ${GITHUB_OUTPUT}) || (echo "Container node versions DON'T match [FAILED]")
       # upload manifest.json only after successful version check
     - name: Prepare manifest.json artifact
       if: steps.check-containers.outputs.match
       run: rm manifest.json && mv manifest-check.json manifest.json
     - name: Upload manifest.json artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       if: steps.check-containers.outputs.match
       with:
         name: manifest.json
@@ -58,17 +58,17 @@ jobs:
     needs: check-versions
     if: needs.check-versions.outputs.match
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         token: ${{ secrets.PUSH_TOKEN }}
     - name: Prepare manifest.json
       run: rm manifest.json
     - name: Fetch manifest.json artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: manifest.json
     - name: Push manifest.json and trigger rebuild
-      uses: EndBug/add-and-commit@v7
+      uses: EndBug/add-and-commit@v9
       with:
         author_name: update bot
         author_email: 41898282+github-actions[bot]@users.noreply.github.com
