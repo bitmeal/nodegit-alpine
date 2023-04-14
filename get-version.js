@@ -68,22 +68,19 @@ function npm_pkg_versions(pkg, redirect_stdout = false) {
             npm.load((err)=>{
                 if(!err) {
                     let view = npm.commands['view'];
-                    // override print method as noop
-                    view.prettyView = ()=>{};
-                    view.printDate = ()=>{};
                     
                     // query registry
                     view
-                    .view([pkg, 'versions'])
+                    .getData(pkg, ['versions'])
                     .then((res) => {
-                        let latest = Object.keys(res)[0];
+                        let latest = Object.keys(res[1][0])[0];
                         
                         attach_console();
                         resolve(
                             {
                                 name: pkg,
                                 latest: latest,
-                                versions: res[latest].versions
+                                versions: res[1][0][latest].versions
                             }
                         );
                     });
