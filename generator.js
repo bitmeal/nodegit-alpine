@@ -40,7 +40,7 @@ function get_versions(node_versions_count, nodegit_versions_count) {
             ];
             
             // filter nodegit versions:
-            //  - no prerelease
+            //  - with prerelease
             //  - clamp at N items
             //  - add 'tag'
             //  - add 'prefix'es
@@ -53,7 +53,7 @@ function get_versions(node_versions_count, nodegit_versions_count) {
 
             nodegit_versions = make_prefixes(
                 latest
-                .minor_latest(versions[1].versions, false, nodegit_versions_count)
+                .minor_latest(versions[1].versions, true, nodegit_versions_count)
                 .map((v) => {
                     version = semver.parse(v['~']);
                     v['tag'] = [version.major, version.minor].join('.');
@@ -149,12 +149,27 @@ function make_test_images(builds, image_name) {
 
 // generate github actions matrix
 function make_matrix(node_versions, nodegit_versions) {
+    unnamed_idx = 0;
+    include = [];
+
+    // skip prereleases
+    while(semver.prerelease(nodegit_versions[unnamed_idx].version))
+    {
+        // // if first prerelease add as version 'next'
+        // if(!unnamed_idx)
+        // {
+        //     include.push({ image: 'next-alpine', nodegit: nodegit_versions[unnamed_idx].version });
+        // }
+        unnamed_idx++;
+    }
+
+    include.push({ image: 'alpine', nodegit: nodegit_versions[unnamed_idx].version });
+
+
     return {
         image: node_versions.map(v => v.image),
         nodegit: nodegit_versions.map(v => v.version),
-        include: [
-            { image: 'alpine', nodegit: nodegit_versions[0].version }
-        ]
+        include
     }
 }
 
