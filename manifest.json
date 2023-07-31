@@ -12,45 +12,43 @@
       "0.26.5",
       "0.25.1"
     ],
-    "include": [
-      {
-        "image": "alpine",
-        "nodegit": "0.27.0"
-      }
-    ]
+    "include": {
+      "image": "alpine",
+      "nodegit": "0.27.0"
+    }
   },
   "buildx": {
     "alpine": {
-      "0.28.0-alpha.21": "--tag bitmeal/nodegit:alpine --tag bitmeal/nodegit:current-alpine --tag bitmeal/nodegit:latest-current-alpine"
+      "0.27.0": "--tag bitmeal/nodegit:alpine --tag bitmeal/nodegit:current-alpine --tag bitmeal/nodegit:latest-current-alpine"
     },
     "lts-alpine": {
-      "0.28.0-alpha.21": "--tag bitmeal/nodegit:0.28-lts-alpine --tag bitmeal/nodegit:latest-lts-alpine --tag bitmeal/nodegit:lts-alpine",
-      "0.27.0": "--tag bitmeal/nodegit:0.27-lts-alpine",
+      "0.28.0-alpha.21": "--tag bitmeal/nodegit:0.28-lts-alpine --tag bitmeal/nodegit:next-lts-alpine",
+      "0.27.0": "--tag bitmeal/nodegit:0.27-lts-alpine --tag bitmeal/nodegit:latest-lts-alpine --tag bitmeal/nodegit:lts-alpine",
       "0.26.5": "--tag bitmeal/nodegit:0.26-lts-alpine",
       "0.25.1": "--tag bitmeal/nodegit:0.25-lts-alpine"
     },
     "20-alpine": {
-      "0.28.0-alpha.21": "--tag bitmeal/nodegit:0.28-20-alpine --tag bitmeal/nodegit:20-alpine --tag bitmeal/nodegit:latest-20-alpine",
-      "0.27.0": "--tag bitmeal/nodegit:0.27-20-alpine",
+      "0.28.0-alpha.21": "--tag bitmeal/nodegit:0.28-20-alpine --tag bitmeal/nodegit:next-20-alpine",
+      "0.27.0": "--tag bitmeal/nodegit:0.27-20-alpine --tag bitmeal/nodegit:20-alpine --tag bitmeal/nodegit:latest-20-alpine",
       "0.26.5": "--tag bitmeal/nodegit:0.26-20-alpine",
       "0.25.1": "--tag bitmeal/nodegit:0.25-20-alpine"
     },
     "18-alpine": {
-      "0.28.0-alpha.21": "--tag bitmeal/nodegit:0.28-18-alpine --tag bitmeal/nodegit:0.28-hydrogen-alpine --tag bitmeal/nodegit:18-alpine --tag bitmeal/nodegit:hydrogen-alpine --tag bitmeal/nodegit:latest-18-alpine --tag bitmeal/nodegit:latest-hydrogen-alpine",
-      "0.27.0": "--tag bitmeal/nodegit:0.27-18-alpine --tag bitmeal/nodegit:0.27-hydrogen-alpine",
+      "0.28.0-alpha.21": "--tag bitmeal/nodegit:0.28-18-alpine --tag bitmeal/nodegit:0.28-hydrogen-alpine --tag bitmeal/nodegit:next-18-alpine --tag bitmeal/nodegit:next-hydrogen-alpine",
+      "0.27.0": "--tag bitmeal/nodegit:0.27-18-alpine --tag bitmeal/nodegit:0.27-hydrogen-alpine --tag bitmeal/nodegit:18-alpine --tag bitmeal/nodegit:hydrogen-alpine --tag bitmeal/nodegit:latest-18-alpine --tag bitmeal/nodegit:latest-hydrogen-alpine",
       "0.26.5": "--tag bitmeal/nodegit:0.26-18-alpine --tag bitmeal/nodegit:0.26-hydrogen-alpine",
       "0.25.1": "--tag bitmeal/nodegit:0.25-18-alpine --tag bitmeal/nodegit:0.25-hydrogen-alpine"
     },
     "16-alpine": {
-      "0.28.0-alpha.21": "--tag bitmeal/nodegit:0.28-16-alpine --tag bitmeal/nodegit:0.28-gallium-alpine --tag bitmeal/nodegit:16-alpine --tag bitmeal/nodegit:gallium-alpine --tag bitmeal/nodegit:latest-16-alpine --tag bitmeal/nodegit:latest-gallium-alpine",
-      "0.27.0": "--tag bitmeal/nodegit:0.27-16-alpine --tag bitmeal/nodegit:0.27-gallium-alpine",
+      "0.28.0-alpha.21": "--tag bitmeal/nodegit:0.28-16-alpine --tag bitmeal/nodegit:0.28-gallium-alpine --tag bitmeal/nodegit:next-16-alpine --tag bitmeal/nodegit:next-gallium-alpine",
+      "0.27.0": "--tag bitmeal/nodegit:0.27-16-alpine --tag bitmeal/nodegit:0.27-gallium-alpine --tag bitmeal/nodegit:16-alpine --tag bitmeal/nodegit:gallium-alpine --tag bitmeal/nodegit:latest-16-alpine --tag bitmeal/nodegit:latest-gallium-alpine",
       "0.26.5": "--tag bitmeal/nodegit:0.26-16-alpine --tag bitmeal/nodegit:0.26-gallium-alpine",
       "0.25.1": "--tag bitmeal/nodegit:0.25-16-alpine --tag bitmeal/nodegit:0.25-gallium-alpine"
     }
   },
   "tags": {
     "alpine": {
-      "0.28.0-alpha.21": [
+      "0.27.0": [
         "alpine",
         "current-alpine",
         "latest-current-alpine"
@@ -59,11 +57,12 @@
     "lts-alpine": {
       "0.28.0-alpha.21": [
         "0.28-lts-alpine",
-        "latest-lts-alpine",
-        "lts-alpine"
+        "next-lts-alpine"
       ],
       "0.27.0": [
-        "0.27-lts-alpine"
+        "0.27-lts-alpine",
+        "latest-lts-alpine",
+        "lts-alpine"
       ],
       "0.26.5": [
         "0.26-lts-alpine"
@@ -75,11 +74,12 @@
     "20-alpine": {
       "0.28.0-alpha.21": [
         "0.28-20-alpine",
-        "20-alpine",
-        "latest-20-alpine"
+        "next-20-alpine"
       ],
       "0.27.0": [
-        "0.27-20-alpine"
+        "0.27-20-alpine",
+        "20-alpine",
+        "latest-20-alpine"
       ],
       "0.26.5": [
         "0.26-20-alpine"
@@ -92,14 +92,16 @@
       "0.28.0-alpha.21": [
         "0.28-18-alpine",
         "0.28-hydrogen-alpine",
+        "next-18-alpine",
+        "next-hydrogen-alpine"
+      ],
+      "0.27.0": [
+        "0.27-18-alpine",
+        "0.27-hydrogen-alpine",
         "18-alpine",
         "hydrogen-alpine",
         "latest-18-alpine",
         "latest-hydrogen-alpine"
-      ],
-      "0.27.0": [
-        "0.27-18-alpine",
-        "0.27-hydrogen-alpine"
       ],
       "0.26.5": [
         "0.26-18-alpine",
@@ -114,14 +116,16 @@
       "0.28.0-alpha.21": [
         "0.28-16-alpine",
         "0.28-gallium-alpine",
+        "next-16-alpine",
+        "next-gallium-alpine"
+      ],
+      "0.27.0": [
+        "0.27-16-alpine",
+        "0.27-gallium-alpine",
         "16-alpine",
         "gallium-alpine",
         "latest-16-alpine",
         "latest-gallium-alpine"
-      ],
-      "0.27.0": [
-        "0.27-16-alpine",
-        "0.27-gallium-alpine"
       ],
       "0.26.5": [
         "0.26-16-alpine",
@@ -135,7 +139,7 @@
   },
   "test-images": {
     "alpine": {
-      "0.28.0-alpha.21": "bitmeal/nodegit:alpine"
+      "0.27.0": "bitmeal/nodegit:alpine"
     },
     "lts-alpine": {
       "0.28.0-alpha.21": "bitmeal/nodegit:0.28-lts-alpine",
