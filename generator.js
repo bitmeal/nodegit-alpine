@@ -8,10 +8,10 @@ const argv = require('yargs');
 // get 'annotated' list of node/image and nodegit versions
 function get_versions(node_versions_count, nodegit_versions_count) {
     return new Promise((resolve) => {
-        let node_versions = latest.node_versions();
-        let nodegit_versions = latest.npm_pkg_versions('nodegit', true);
-        Promise.all([node_versions, nodegit_versions])
-        .then((versions) => {
+        let p_node_versions = latest.node_versions();
+        let p_nodegit_versions = latest.npm_pkg_versions('nodegit', true);
+        Promise.all([p_node_versions, p_nodegit_versions])
+        .then(([node_versions_all, nodegit_versions_all]) => {
             // filter node versions:
             //  - lts
             //  - latest (if not lts)
@@ -33,7 +33,7 @@ function get_versions(node_versions_count, nodegit_versions_count) {
                 ...make_image_info(
                     ((versions, latest) => {
                         return latest.lts ? versions : [latest, ...versions];
-                    })(versions[0].filter(v => v.lts), versions[0][0])
+                    })(node_versions_all.filter(v => v.lts), node_versions_all[0])
                     .map(v => Object.assign(v, {lts: v.lts ? v.lts.toLowerCase() : v.lts}))
                     .slice(0, node_versions_count)
                 )
@@ -45,21 +45,28 @@ function get_versions(node_versions_count, nodegit_versions_count) {
             //  - add 'tag'
             //  - add 'prefix'es
             let make_prefixes = (versions) => {
-                return [
-                    Object.assign(versions[0], {tag_prefixes: ['', 'latest', versions[0].tag]}),
-                    ...versions.slice(1).map(v => Object.assign(v, {tag_prefixes: [v.tag]}))
-                ]
+                // get index for latest to add 'latest' and <empty> prefix
+                latest_idx = versions.findIndex(v => !v.prerelease)
+                // get index for a prerelease version: should only ever get one (latest next)
+                next_idx = versions.findIndex(v => v.prerelease)
+                
+                return versions.map((v, idx) => Object.assign(v, {
+                    tag_prefixes: [
+                        ...(idx == latest_idx ? ['', 'latest'] : []),
+                        ...(idx == next_idx ? ['next'] : []),
+                        v.tag
+                    ]
+                }));
             };
 
             nodegit_versions = make_prefixes(
-                latest
-                .minor_latest(versions[1].versions, true, nodegit_versions_count)
-                .map((v) => {
-                    version = semver.parse(v['~']);
-                    v['tag'] = [version.major, version.minor].join('.');
-                    return v;
-                })
-                .reverse()
+                latest.minor_latest(nodegit_versions_all.versions, true, nodegit_versions_count)
+                    .map((v) => {
+                        version = semver.parse(v['~']);
+                        v['tag'] = [version.major, version.minor].join('.');
+                        return v;
+                    })
+                    .reverse()
             );
 
             resolve(
@@ -82,7 +89,7 @@ function make_build_info(node_versions, nodegit_versions) {
             image: 'alpine',
             variants: [
                 {
-                    nodegit: nodegit_versions[0].version,
+                    nodegit: nodegit_versions.find(v => !semver.prerelease(v.version)).version,
                     tags: ['alpine', 'current-alpine', 'latest-current-alpine']
                 }
             ]
@@ -149,27 +156,10 @@ function make_test_images(builds, image_name) {
 
 // generate github actions matrix
 function make_matrix(node_versions, nodegit_versions) {
-    unnamed_idx = 0;
-    include = [];
-
-    // skip prereleases
-    while(semver.prerelease(nodegit_versions[unnamed_idx].version))
-    {
-        // // if first prerelease add as version 'next'
-        // if(!unnamed_idx)
-        // {
-        //     include.push({ image: 'next-alpine', nodegit: nodegit_versions[unnamed_idx].version });
-        // }
-        unnamed_idx++;
-    }
-
-    include.push({ image: 'alpine', nodegit: nodegit_versions[unnamed_idx].version });
-
-
     return {
         image: node_versions.map(v => v.image),
         nodegit: nodegit_versions.map(v => v.version),
-        include
+        include: { image: 'alpine', nodegit: nodegit_versions.find(v => !semver.prerelease(v.version)).version }
     }
 }
 
