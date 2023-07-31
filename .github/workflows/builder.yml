@@ -56,9 +56,14 @@ jobs:
     - name: Check Nodegit Version
       run: |
         IMAGE="$(echo '${{needs.generator.outputs.test-images}}' | jq -r '."${{matrix.image}}"."${{matrix.nodegit}}"')" && 
-        NODEGIT="$(docker run --rm $IMAGE /usr/local/bin/npm -g ls | grep '^\+.*\snodegit@' | grep -oP '(\d+\.){2}\d+')" && echo "nodegit versions: ${NODEGIT}"
+        NODEGIT="$(docker run --rm $IMAGE /usr/local/bin/npm -g ls nodegit --json | jq -r '.dependencies.nodegit.version')" && echo "nodegit versions: ${NODEGIT}"
         [ "$NODEGIT" == "${{matrix.nodegit}}" ] && 
         echo "nodegit versions @${{matrix.nodegit}} [ OK ]"
+      # run: |
+      #   IMAGE="$(echo '${{needs.generator.outputs.test-images}}' | jq -r '."${{matrix.image}}"."${{matrix.nodegit}}"')" && 
+      #   NODEGIT="$(docker run --rm $IMAGE /usr/local/bin/npm -g ls | grep '^\+.*\snodegit@' | grep -oP '(\d+\.){2}\d+')" && echo "nodegit versions: ${NODEGIT}"
+      #   [ "$NODEGIT" == "${{matrix.nodegit}}" ] && 
+      #   echo "nodegit versions @${{matrix.nodegit}} [ OK ]"
     - name: Test Nodegit
       run: |
         IMAGE="$(echo '${{needs.generator.outputs.test-images}}' | jq -r '."${{matrix.image}}"."${{matrix.nodegit}}"')" && 
