@@ -12,10 +12,12 @@
       "0.26.5",
       "0.25.1"
     ],
-    "include": {
-      "image": "alpine",
-      "nodegit": "0.27.0"
-    }
+    "include": [
+      {
+        "image": "alpine",
+        "nodegit": "0.27.0"
+      }
+    ]
   },
   "buildx": {
     "alpine": {

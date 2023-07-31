@@ -159,7 +159,7 @@ function make_matrix(node_versions, nodegit_versions) {
     return {
         image: node_versions.map(v => v.image),
         nodegit: nodegit_versions.map(v => v.version),
-        include: { image: 'alpine', nodegit: nodegit_versions.find(v => !semver.prerelease(v.version)).version }
+        include: [{ image: 'alpine', nodegit: nodegit_versions.find(v => !semver.prerelease(v.version)).version }]
     }
 }
 
