@@ -17,16 +17,16 @@ jobs:
       run: sudo apt install -qq -y jq
     - name: Export Build Matrix
       id: generate-matrix
-      run: echo "matrix=$(jq -rc '.[\"matrix\"]' manifest.json)" >> ${GITHUB_OUTPUT}
+      run: echo "matrix=$(jq -rc '.matrix' manifest.json)" >> ${GITHUB_OUTPUT}
     - name: Export docker build/buildx tags
       id: generate-buildx
-      run: echo "buildx=$(jq -rc '.[\"buildx\"]' manifest.json)" >> ${GITHUB_OUTPUT}
+      run: echo "buildx=$(jq -rc '.buildx' manifest.json)" >> ${GITHUB_OUTPUT}
     - name: Export tag list
       id: generate-tags
-      run: echo "tags=$(jq -rc '.[\"tags\"]' manifest.json)" >> ${GITHUB_OUTPUT}
+      run: echo "tags=$(jq -rc '.tags' manifest.json)" >> ${GITHUB_OUTPUT}
     - name: Export testing image names/tags
       id: generate-test-images
-      run: echo "test-images=$(jq -rc '.[\"test-images\"]' manifest.json)" >> ${GITHUB_OUTPUT}
+      run: echo "test-images=$(jq -rc '."test-images"' manifest.json)" >> ${GITHUB_OUTPUT}
   
   image-builder:
     needs: generator
